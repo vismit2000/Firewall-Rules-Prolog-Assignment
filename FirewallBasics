@@ -26,7 +26,8 @@ allowed through. Otherwise it is discarded.
 Firewall Configuration
  I can add or remove filters based on several conditions. Some of these are:
  
- 1.)IP addresses - Each machine on the Internet is assigned a unique address called an IP address. IP addresses are 32-bit numbers, normally expressed as four "octets" in a "dotted decimal number." A typical IP address looks like this: 216.27.61.137. For example, if a certain IP address outside the company is reading too many files from a server, the firewall can block all traffic to or from that IP address.
+ 1.)IP addresses - Each machine on the Internet is assigned a unique address called an IP address. IP addresses are 32-bit numbers,referred to as “IPv4", normally expressed as four "octets" in a "dotted decimal number." A typical IP address looks like this: 216.27.61.137. For example, if a certain IP address outside the company is reading too many files from a server, the firewall can block all traffic to or from that IP address. Due  to  the  rapidly diminishing number of IPv4 addresses available as more and more computerized devices connect to the Internet, a new address format, dubbed “IPv6”, has recently begun to see use. This version uses a 128 bit number, which allows a far wider range of  possible addresses.  Each  packet  specifies both the  IP it  initially came  from, which is referred to as the source IP address, and the IP address that it is trying
+to reach, known as the destination IP addresses
  2.)Domain Names - readable names for replacemenet of ip addresses
  
  3.)Protocols - The protocol is the pre-defined way that someone who wants to use a service talks with that service. The "someone" could be a person, but more often it is a computer program like a Web browser. Protocols are often text, and simply describe how the client and server will have their conversation. The http in the Web's protocol. Some common protocols that you can set firewall filters for include:
@@ -41,9 +42,20 @@ Firewall Configuration
     SNMP (Simple Network Management Protocol) - used to collect system information from a remote computer
     Telnet - used to perform commands on a remote computer
  
- 4.)Ports - Any server machine makes its services available to the Internet using numbered ports, one for each service that is available on the server. For example, if a server machine is running a Web (HTTP) server and an FTP server, the Web server would typically be available on port 80, and the FTP server would be available on port 21. A company might block port 21 access on all machines but one inside the company.
+ 4.)Ports - Any server machine makes its services available to the Internet using numbered ports, one for each service that is available on the server. For example, if a server machine is running a Web (HTTP) server and an FTP server, the Web server would typically be available on port 80, and the FTP server would be available on port 21. A company might block port 21 access on all machines but one inside the company.Ports are used as a way to identify what the packet is used for and to forward it to the desired process.   There  are  over  65,000  ports  available  though  the  majority  are  unused on  a  daily  basis.   Certain  functions  such  as  HTTP  for  web  browsers  have  an informally agreed upon port.  While the port can be changed if so desired, these defaults simplify the connection for users.  Port numbers are usually added to the end of an IP Address and separated by a colon.  For example,  a packet that is estined for IP address 230.105.4.32 and port 80 would have a destination address of 230.105.4.32:80
+
  
  5.)Specific words and phrases - This can be anything. The firewall will sniff (search through) each packet of information for an exact match of the text listed in the filter. For example, you could instruct the firewall to block any packet with the word "X-rated" in it. The key here is that it has to be an exact match. The "X-rated" filter would not catch "X rated" (no hyphen). But you can include as many words, phrases and variations of them as you need.
  
+ 
+ 
+ 
+ 
+ 
+Network Adapter-A network adapter is the component of a computer’s internal hardware that is used for communicating over a network with another computer. It enable a computer to connect with another computer, server or any networking device over an LAN connection. A network adapter can be used over a wired or wireless network.
 
+802.1Q –
+It is IEEE standard method of frame tagging. If user wants to trunk between a Cisco switch link and a different brand switch link, then have to use 802.1Q encapsulation for the trunk to work.
+
+In 802.1Q, the trunking device inserts a 4-byte tag into the original frame and recomputes the frame check sequence (FCS) before the device sends the frame over the trunk link. At the receiving end, the tag is removed and the frame is forwarded to the assigned VLAN. 
  
