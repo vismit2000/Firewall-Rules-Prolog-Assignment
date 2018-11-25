@@ -59,3 +59,7 @@ It is IEEE standard method of frame tagging. If user wants to trunk between a Ci
 
 In 802.1Q, the trunking device inserts a 4-byte tag into the original frame and recomputes the frame check sequence (FCS) before the device sends the frame over the trunk link. At the receiving end, the tag is removed and the frame is forwarded to the assigned VLAN. 
  
+ In an IP address,The slash and the number following it is just a shorthand way to write a subnet mask. It's called CIDR (Classless Inter-Domain Routing) notation. It's also commonly referred to as the prefix length.
+The number after the slash represents the number of consecutive 1's in the subnet mask. For example, 192.168.10.0/24 is equal to the network 192.168.10.0 with a 255.255.255.0 subnet mask. If you convert 255.255.255.0 to binary, you end up with 24 consecutive 1's:
+11111111.11111111.11111111.00000000
+Another example could be 10.0.0.0/8. 8 consecutive 1's in the subnet mask gives you 11111111.00000000.00000000.00000000 or 255.0.0.0.
