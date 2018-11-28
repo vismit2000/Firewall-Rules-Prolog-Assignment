@@ -1,0 +1,98 @@
+/*-----------------Rules------------------*/
+
+/*Src_IP_List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ *Dest_IP_List is ['dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ *Adapter_Num_List is ['adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ *Protocol_Type_List is ['protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID'] 
+ *Port_Num_List is ['port_num','icmpv6_type','icmpv6_msg_code','VLan_ID'] 
+ *IcmpV6_Type_List is ['icmpv6_type','icmpv6_msg_code','VLan_ID'] 
+ *Icmpv6_Msg_Code_List is ['icmpv6_msg_code','VLan_ID'] 
+ *Vlan_ID_List is ['VLan_ID'] 
+ */
+
+
+src_ip(Packet_Name,Src_IP) :- 
+    packet(Packet_Name,List),
+    [Src_IP|_]=List.
+
+dest_ip(Packet_Name,Dest_IP) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [Dest_IP|_]=Dest_IP_List.
+
+adapter_num(Packet_Name,Adapter_Num) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [Adapter_Num|_]=Adapter_Num_List.
+
+protocol_type(Packet_Name,Protocol_Type) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [_|Protocol_Type_List]=Adapter_Num_List,
+    [Protocol_Type|_] = Protocol_Type_List.
+
+
+
+
+
+port_num(Packet_Name,Port_Num) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [_|Protocol_Type_List]=Adapter_Num_List,
+    [_|Port_Num_List] = Protocol_Type_List,
+    [Port_Num|_] = Port_Num_List.
+
+
+icmpv6_type(Packet_Name,Icmpv6_Type) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [_|Protocol_Type_List]=Adapter_Num_List,
+    [_|Port_Num_List] = Protocol_Type_List,
+    [_|IcmpV6TypeList] = Port_Num_List,
+    [Icmpv6_Type|_] = IcmpV6TypeList.
+
+
+icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [_|Protocol_Type_List]=Adapter_Num_List,
+    [_|Port_Num_List] = Protocol_Type_List,
+    [_|IcmpV6TypeList] = Port_Num_List,
+    [_|IcmpV6MsgCodeList] = IcmpV6TypeList,
+    [Icmpv6_MsgCode|_] = IcmpV6MsgCodeList.
+
+
+vlanId(Packet_Name,VlanId) :- 
+    packet(Packet_Name,List),
+    [_|Dest_IP_List]=List,
+    [_|Adapter_Num_List]=Dest_IP_List,
+    [_|Protocol_Type_List]=Adapter_Num_List,
+    [_|Port_Num_List] = Protocol_Type_List,
+    [_|IcmpV6TypeList] = Port_Num_List,
+    [_|IcmpV6MsgCodeList] = IcmpV6TypeList,
+    [_|VlanIdList] = IcmpV6MsgCodeList,
+	[VlanId|_] = VlanIdList.
+
+
+
+/*----------------FACTS-------------*/
+
+packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
+
+
+
+
+/*----------------Query--------------*/
+src_ip(pack1,Src_IP),
+dest_ip(pack1,Dest_IP),
+adapter_num(pack1,Adapter_Num),
+protocol_type(pack1,Protocol_type),
+port_num(pack1,Port_Num),
+icmpv6_type(pack1,Icmpv6_Type),
+icmpv6_msgCode(pack1,Icmpv6_MsgCode),
+vlanId(pack1,VlanId).
