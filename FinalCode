@@ -1,0 +1,232 @@
+/*----------------NEW CODE----------------------*/
+/*-----------------Rules------------------*/
+
+/*
+ * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ */
+
+
+src_ip(Packet_Name,Src_IP) :- 
+    packet(Packet_Name,List),
+    [Src_IP|_]=List.
+
+dest_ip(Packet_Name,Dest_IP) :- 
+    packet(Packet_Name,List),
+    [_|[Dest_IP|_]]=List.
+
+adapter_num(Packet_Name,Adapter_Num) :- 
+    packet(Packet_Name,List),
+    [_|[_|[Adapter_Num|_]]]=List.
+
+protocol_type(Packet_Name,Protocol_Type) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[Protocol_Type|_]]]]=List.
+
+port_num(Packet_Name,Port_Num) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[Port_Num|_]]]]]=List.
+
+
+icmpv6_type(Packet_Name,Icmpv6_Type) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[Icmpv6_Type|_]]]]]]=List.
+
+icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :- 
+    packet(Packet_Name,List),
+	[_|[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]]=List.
+
+vlanId(Packet_Name,VlanId) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
+
+
+/*----------------FACTS-------------*/
+
+packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
+
+
+
+
+/*
+----------------Query--------------
+src_ip(pack1,Src_IP),
+dest_ip(pack1,Dest_IP),
+adapter_num(pack1,Adapter_Num),
+protocol_type(pack1,Protocol_type),
+port_num(pack1,Port_Num),
+icmpv6_type(pack1,Icmpv6_Type),
+icmpv6_msgCode(pack1,Icmpv6_MsgCode),
+vlanId(pack1,VlanId).
+*/
+
+--------------*/
+
+/*----------Lists for accept/reject/drop ------------*/
+
+rejectSrcIP = []
+dropSrcIP =[]
+
+rejectDestIP = []
+dropDestIP =[]
+
+rejectPortno = []
+dropPortno =[]
+
+rejectAdapter = []
+dropAdapter =[]
+
+rejectProtocolType = []
+dropProtocolType =[]
+
+rejectVlanId = []
+dropVlanId =[]
+
+rejectIcmpv6Type = []
+dropIcmpv6Type =[]
+
+rejectIcmpv6Code = []
+dropIcmpv6Code =[]
+
+
+/*--------main program--------*/
+
+accept(‘clause’);
+reject(‘clause’);
+drop(‘clause’);
+
+Input ---> fateOfPacket(Packet_Name)  -- returns accept/reject/drop
+
+
+
+
+
+
+
+/*---------------------------*/
+Parsing of clauses
+
+Clauses
+
+adapter <adapter-id>		// A / (A,B) / any / A-H
+ether proto <protocol-id>  // ox6dd / 234 / octal / alias
+ether vid <vlan-number>	// 2 / 2-190
+ether vid <vlan-number> proto <protocol-id>
+ 
+ip src addr <ipv4-addr>	// (192.168.10.1/24) /        (192.168.10.0-192.168.10.255)
+ip dst addr <ipv4-addr>
+ip addr <ipv4-addr>
+ip proto <protocol-type>
+ip src addr <ipv4-addr> dst addr <ipv4-addr>
+ip src addr <ipv4-addr> dst addr <ipv4-addr> proto <protocol-type>
+ 
+ipv6 src addr <ipv6-addr> //(FF01:0:0:0:0:0:0:101)/(12AB:0:0:CD30::/60)/(FF01::101-FF01:0:0:0:0:0:0:200)
+ipv6 dst addr <ipv6-addr>
+ipv6 addr <ipv6-addr>
+ipv6 proto <protocol-type>
+ipv6 src addr <ipv6-addr> dst addr <ipv6-addr>
+ipv6 src addr <ipv6-addr> dst addr <ipv6-addr> proto <protocol-type>
+ 
+tcp src port <tcp-udp-port>// decimal/octAL/hexadecimal
+tcp dst port <tcp-udp-port>
+tcp dst port <tcp-udp-port> src port <tcp-udp-port>
+udp src port <tcp-udp-port>
+udp dst port <tcp-udp-port>
+udp dst port <tcp-udp-port> src port <tcp-udp-port>
+ 
+icmp type <protocol-type>
+icmp code <message-code>
+icmp type <protocol-type> code <message-code>
+ 
+icmpv6 type <protocol-type>	//(decimal, octal, or hexadecimal)
+icmpv6 code <message-code>
+icmpv6 type <protocol-type> code <message-code>
+
+
+
+
+/*-----------RULE BASE--------------*/
+accept('adapter A').
+accept('adapter D,E,F').
+reject('adapter B-C').
+drop('adapter any').
+
+accept('ether vid 2').
+reject('ether vid 5-19').
+drop('ether proto 0x6dd').
+accept('ether proto 187').
+accept('ether proto 127').
+accept('ether proto asd').
+accept('ether vlan 5 proto 187').
+
+
+accept('ip src addr 172.12.12.2').
+accept('ip dst addr 122.12.12.2').
+accept('ip addr 172.2.12.2').
+accept('ip proto tcp').
+accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+
+
+
+
+
+
+
+
+
+
+
+/*------------Rule to see if adapter is acceptable------------*/
+adapterAccepted(AcceptedAdapter) :- 
+    accept(X),
+    sub_string(X,7,_,_,AcceptedAdapter),
+    AcceptedAdapter \= "",
+    AcceptedAdapter \= " ".
+
+isExprAList(X) :- chPresentInStr(',',X).
+isExprARange(X) :- chPresentInStr('-',X).
+isExprADiscrValue(X) :- not(isExprAList(X)),not(isExprARange(X)).
+
+chPresentInStr(Ch,Str) :- sub_atom_icasechk(Str,_,Ch).
+
+
+
+
+
+
+
+
+
+
+
+
+accept(‘ip src addr 172.24.16.31 dst addr 172.36.24.11 proto udp’).
+accept(‘ipv6 src addr FF01:0:0:0:0:0:0:101’).
+reject(‘ipv6 dst addr 12AB:0:0:CD30::/60’).
+drop(‘ipv6 addr 1:0:0:0:0:0:0:200’).
+accept(‘ipv6 proto ftp’).
+reject(‘ipv6 src addr 1:0:0:0:0:0:0:20 dst addr 12AB:0:0:CD30::/60’).
+drop(‘ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3’).
+
+accept(‘tcp src port 4’).
+reject(‘tcp dst port 6’).
+drop(‘tcp dst port 4500 src port 456’).
+accept(‘udp src port 5469’).
+accept(‘udp dst port 789 src port 789’).
+
+accept(‘icmp type ftp’).
+
+accept(‘icmp code __’).
+accept(‘icmp type udp code ___’).
+accept(‘icmpv6 type ftp’).
+accept(‘icmpv6 code __’).
+accept(‘icmpv6 type udp code ___’).
+
+
+icmp type <protocol-type>
+icmp code <message-code>
+icmp type <protocol-type> code <message-code>
+ 
+icmpv6 type <protocol-type>	//(decimal, octal, or hexadecimal)
+icmpv6 code <message-code>
+icmpv6 type <protocol-type> code <message-code>
+
