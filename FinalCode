@@ -77,8 +77,10 @@ accept('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
 accept('ipv6 proto ftp').
 accept('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
 accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
-accept('icmpv6 type ftp').
+accept('icmp code 1234').
 accept('icmpv6 type tcp code 1223').
+accept('icmp code 123').
+accept('icmpv6 type tcp code 123').
 
 
 /*------------Rule to see if adapter is acceptable------------*/
@@ -625,6 +627,7 @@ isICMPTypeAccepted(Type) :-
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
+    not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
     Start is StartTemp + 5,
     (
@@ -644,6 +647,18 @@ isICMPCodeAccepted(Code) :-
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
+    not(sub_string(X,_,_,_,'icmpv6')),
+    sub_string(X,StartTemp,_,_,'code'),
+    Start is StartTemp + 5,
+    (
+            Length is XLength - Start
+    ),
+    sub_string(X,Start,Length,_,Code).
+/*----------------ICMPV6 type and code accepted------------------*/
+isICMPV6TypeAccepted(Type) :- 
+    accept(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
     Start is StartTemp + 5,
     (
@@ -658,6 +673,17 @@ isICMPCodeAccepted(Code) :-
         )
     ),
     sub_string(X,Start,Length,_,Type).
+    
+isICMPV6CodeAccepted(Code) :- 
+    accept(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmpv6'),
+    sub_string(X,StartTemp,_,_,'code'),
+    Start is StartTemp + 5,
+    (
+            Length is XLength - Start
+    ),
+    sub_string(X,Start,Length,_,Code).
 
 /*
  * 
