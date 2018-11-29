@@ -1,0 +1,722 @@
+
+/*
+ * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ */
+
+
+src_ip(Packet_Name,Src_IP) :- 
+    packet(Packet_Name,List),
+    [Src_IP|_]=List.
+
+dest_ip(Packet_Name,Dest_IP) :- 
+    packet(Packet_Name,List),
+    [_|[Dest_IP|_]]=List.
+
+adapter_num(Packet_Name,Adapter_Num) :- 
+    packet(Packet_Name,List),
+    [_|[_|[Adapter_Num|_]]]=List.
+
+protocol_type(Packet_Name,Protocol_Type) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[Protocol_Type|_]]]]=List.
+
+port_num(Packet_Name,Port_Num) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[Port_Num|_]]]]]=List.
+
+
+icmpv6_type(Packet_Name,Icmpv6_Type) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[Icmpv6_Type|_]]]]]]=List.
+
+icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :- 
+    packet(Packet_Name,List),
+	[_|[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]]=List.
+
+vlanId(Packet_Name,VlanId) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
+
+
+/*----------------FACTS-------------*/
+
+packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
+
+/*-----------Rule Base-----------*/
+/*-----------Ethernet Clause-----------*/
+drop('ether proto 187').
+drop('ether proto 127').
+drop('ether proto asd').
+drop('ether proto 0x6dd').
+drop('ether vid 2').
+drop('ether vid 20-191 proto 1111').
+drop('ether vid 5,4,1,8 proto 117').
+
+/*-----------Adapter Clause-----------*/
+drop('adapter C,F,K').
+drop('adapter A').
+drop('adapter L-P').
+drop('adapter any').
+
+/*-----------Ipv4 Datagram Clause-----------*/
+drop('ip dst addr 172.12.12.2').
+drop('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
+drop('ip dst addr 72.12.12.2-100.21.11.2').
+drop('ip dst addr 122.12.12.2').
+drop('ip addr 172.2.12.2,123.121.11').
+drop('ip proto tcp').
+drop('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+
+/*-----------Ipv6 Datagram Clause-----------*/
+drop('ipv6 src addr FF01:0:0:0:0:0:0:101').
+drop('ipv6 src addr 1:0:0:0:0:0:0:101').
+drop('ipv6 dst addr 12AB:0:0:CD30::/60').
+drop('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
+drop('ipv6 proto ftp').
+drop('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
+drop('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
+
+/*-----------TCP and UDP Conditions-----------*/
+drop('udp dst port 4-10').
+drop('udp dst port 6').
+drop('udp dst port 4500,3456 src port 456,234,12').
+
+/*-----------ICMP Conditions-----------*/
+drop('icmp code 1234').
+drop('icmp code 123').
+
+/*-----------ICMPV6 Conditions-----------*/
+drop('icmpv6 type tcp code 1223').
+drop('icmpv6 type tcp code 123').
+
+/*------------Rule to see if adapter is droppable------------*/
+isAdapterDropped(AdapterName) :- 
+    drop(X),	%Check for clauses in drop predicate
+    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
+    (
+    	%There's a direct match
+	    (
+		     sub_string(X,_,_,_,AdapterNamePresent),
+		     AdapterNamePresent=AdapterName
+	    )
+	    ;
+    	%Adapter present between given range
+	    (
+		     isExprARange(X),
+		     sub_string(X,8,1,_,LeftOfRange),
+		     sub_string(X,10,1,_,RightOfRange),
+		     char_code(LeftOfRange,LeftOfRangeAscii),
+		     char_code(RightOfRange,RightOfRangeAscii),
+		     char_code(AdapterName,AdapterAscii),
+		     AdapterAscii>=LeftOfRangeAscii,
+		     AdapterAscii=<RightOfRangeAscii
+	    )
+	    ;
+    	%if any is present drop all adapters
+	    (   
+	    	 sub_string(X,8,3,_,'any')
+	    )
+    ).
+
+    /*------------Rule to see if ProtocolID is droppable------------*/
+	isProtocolIDDropped(ProtocolId) :- 
+	    drop(X),
+	    (
+	      (
+	        sub_string(X,_,_,_,'ether proto'),	
+	        % no vlan id present in clause (ether proto and no vid)
+	        sub_string(X,_,_,_,PresentProtocolID),
+	        PresentProtocolID = ProtocolId
+	      )
+	    	;
+	      % vlan id present in clause (ether vid _ proto )
+	      (   
+	          sub_string(X,Index,_,_,'proto'),
+	          %Index>=7 signifies that vid is present too
+	          Index >= 7,
+	          %Direct match now
+	          sub_string(X,_,_,_,PresentProtocolID),
+	          PresentProtocolID = ProtocolId
+	      )
+	    ).
+
+/*------------Rule to see if VlanID is droppable------------*/
+	isVlanIDDropped(VlanId) :- 
+	    drop(X),
+	    sub_string(X,0,9,_,'ether vid'),
+	    (   
+	    		%direct match
+	      (
+	          sub_string(X,Start,_,_,PresentVlanID),
+	          sub_string(X,ProtoIndex,5,_,'proto'),
+	          Start<ProtoIndex,
+	          PresentVlanID = VlanId
+	      )
+	      ;
+	      (
+	    	%VId is in range format in clause(ether vid x-y)
+	          sub_string(X,10,Len,_,Range),
+	          isExprARange(Range),
+	          Start is 10+Len,
+	          sub_string(X,Start,1,_,' '),
+	          sub_string(Range,0,Len2,_,LeftOfRange),%LeftOfRange is Left number in string Format
+	          Start2 is 1+Len2,
+	          not(sub_string(Range,Start2,1,_,'-')),
+	          Start3 is Start2,
+	          sub_string(Range,Start3,Len3,_,RightOfRange),%RightOfRange same as LeftOfRange
+	          Start4 is 1+Len3,
+	          sub_string(Range,Start4,_,0,_),
+	          atom_number(LeftOfRange,LeftNum),
+	          atom_number(RightOfRange,RightNum),
+	          atom_number(VlanId,VlanIdNum),
+	          LeftNum=<VlanIdNum,	%Check if VLAn id lies within range
+	          RightNum>=VlanIdNum
+	      )
+	    ).
+/*------------------SRC IP--------------------*/
+	isSrcIPDropped(SrcIP) :- 
+    	drop(X),
+    	atom_length(X,XLength),	%XLength stores length of X
+    	sub_string(X,0,2,_,'ip'),
+    	(
+    		%src ip syntax:- ip src addr or src addr dst addr
+          (
+            sub_string(X,SrcIndex,3,_,'src'),
+            Start1 is SrcIndex+9,
+                (   
+                 %src and dst addr(' ' signifies space before dst)
+                  (
+                    sub_string(X,Start2,1,_,' '),
+                    Start2 >= Start1,
+                    Length is Start2-Start1,
+                    sub_string(X,Start1,Length,_,SrcIPList),
+                      (   
+                      	(
+                        	isExprARange(SrcIPList),
+                            isIPInRange(SrcIP,SrcIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(SrcIPList,_,_,_,SrcIP)                        	
+                        )
+                      )
+
+                  );
+                 %only src addr present
+                 (
+                     not(sub_string(X,_,3,_,'dst')),
+                     sub_string(X,_,3,_,'src'),
+                     StrLen is XLength - Start1,
+                     sub_string(X,Start1,StrLen,_,SrcIPList),
+                     (   
+                      	(
+                        	isExprARange(SrcIPList),
+                            isIPInRange(SrcIP,SrcIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(SrcIPList,_,_,_,SrcIP)                        	
+                        )
+                      )
+                 )
+               )
+          );
+          %deals with the case when only addr is written
+           (   
+                not(sub_string(X,_,3,_,'dst')),
+                not(sub_string(X,_,3,_,'src')),
+                sub_string(X,Start,4,_,'addr'),
+                Start2 is Start+5,
+               	StrLen is XLength - Start2,
+                sub_string(X,Start2,StrLen,_,SrcIPList),
+               	(   
+                      	(
+                        	isExprARange(SrcIPList),
+                            isIPInRange(SrcIP,SrcIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(SrcIPList,_,_,_,SrcIP)                        	
+                        )
+                      )
+           )
+        ).
+
+
+    %------DST IP
+	isDstIPDropped(DstIP) :- 
+    	drop(X),
+    	atom_length(X,XLength),
+    	sub_string(X,0,2,_,'ip'),
+    	(
+    %dst ip syntax:- ip dst addr or src addr dst addr 
+          (
+            sub_string(X,_,3,_,'dst'),
+                (   
+                 %both src and dst addr present
+                  (
+                  	sub_string(X,SrcIndex,3,_,'src'),
+            		Start1 is SrcIndex+9,
+                    sub_string(X,Start2,1,_,' '),
+                    Start2 >= Start1,
+                     DstStart is Start2 + 10,
+                    (
+                      (   
+                      	sub_string(X,ProtoIndex,_,_,'proto'),
+                      	Length is ProtoIndex-DstStart+1
+                      )
+                      ;
+                      (   
+                        not(sub_string(X,_,_,_,'proto')),
+                        Length is XLength - DstStart
+                      )  
+                    ),
+                    sub_string(X,DstStart,Length,_,DstIPList),
+                      (   
+                      /*-------Checking if there is a range------*/
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      /*-------Checking if there is a direct match(i.e. discrete or list)------*/
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+
+                  );
+                /*-----------only dst addr present------------*/
+                 (
+                     not(sub_string(X,_,3,_,'src')),
+                     sub_string(X,DstStartTemp,3,_,'dst'),
+                     DstStart is DstStartTemp + 9,
+                     StrLen is XLength - DstStart,
+                     sub_string(X,DstStart,StrLen,_,DstIPList),
+                     (   
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+                 )
+               )
+          );
+        /*--------deals with the case when only addr is written-------*/
+           (   
+                not(sub_string(X,_,3,_,'dst')),
+                not(sub_string(X,_,3,_,'src')),
+                sub_string(X,Start,4,_,'addr'),
+                Start2 is Start+5,
+               	StrLen is XLength - Start2,
+                sub_string(X,Start2,StrLen,_,DstIPList),
+               	(   
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+           )
+        ).
+
+
+
+
+/*----------function to insert element in a list---------*/
+	insert(X,[],[X]).
+	insert(X,[H|Tail],[H|NewTail]):-
+    insert(X,Tail,NewTail).
+/*-----------converts a list containing numbers as strings into numbers--------*/
+    cnvrtStrListToNumList(IPContents,IPContentsList) :-
+        [Elem1|RemPart1] = IPContents,
+        [Elem2|RemPart2] = RemPart1,
+        [Elem3|RemPart3] = RemPart2,
+        [Elem4|_] = RemPart3,
+        atom_number(Elem1,NewElem1),
+        atom_number(Elem2,NewElem2),
+        atom_number(Elem3,NewElem3),
+        atom_number(Elem4,NewElem4),
+        insert(NewElem1,[],W), 
+        insert(NewElem2,W,X),
+        insert(NewElem3,X,Y),
+        insert(NewElem4,Y,IPContentsList).
+/*---------------checks if a given IP lies between the given range of IPs-----------------*/
+	isIPInRange(IP,Range) :- 
+    	isExprARange(Range),
+    	sub_string(Range,HyphenIndex,1,_,'-'),
+    	atom_length(Range,RangeLength),
+    	LeftIPLength is HyphenIndex,
+    	RightIPLength is RangeLength-LeftIPLength-1,
+    	sub_string(Range,0,LeftIPLength,_,LeftIP),
+    	RightIPIndex is HyphenIndex+1,
+    	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP),
+    	split_string(LeftIP,".","", LeftIPContents),
+    	split_string(RightIP,".","", RightIPContents),
+    	split_string(IP,".","", GivenIPContents),
+    	cnvrtStrListToNumList(LeftIPContents,LeftIPContentsList),
+    	cnvrtStrListToNumList(GivenIPContents,GivenIPContentsList),
+    	cnvrtStrListToNumList(RightIPContents,RightIPContentsList),
+    	isIPALessThanB(LeftIPContentsList,GivenIPContentsList),
+    	isIPALessThanB(GivenIPContentsList,RightIPContentsList).
+  
+/*--------------takes list of 2 ips and tell if one ip is less than other----------------*/
+	isIPALessThanB(IP_A,IP_B) :- 
+    	[H1|T1] = IP_A,
+    	[H2|T2] = IP_B,
+		[H3|T3] = T1,
+    	[H4|T4] = T2,
+		[H5|T5] = T3,
+    	[H6|T6] = T4,
+		[H7|_] = T5,
+    	[H8|_] = T6,
+     (   
+        (H1 < H2);
+    		(   
+            	( H1 = H2 ),
+                	(   
+                    	( H3<H4  );
+                    		(   
+                            	(H3=H4),
+                                	(   
+                                    	(H5<H6);
+                                    		(   
+                                            	(H5=H6),
+                                                (H7<H8)
+                                            )
+                                    )
+                            )
+                    )
+            )
+	 ).
+     %Checks if TCP Src is dropped
+	isTCPSrcDropped(TCPPortNo) :- 
+    	drop(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'tcp'),
+    	sub_string(X,Start,3,_,'src'),
+    	ListStart is Start+9,
+    	Length is XLength - ListStart,
+    	sub_string(X,ListStart,Length,_,TCPList),
+    		(   
+    		 %Direct Match
+              (   
+              	sub_string(TCPList,_,_,_,TCPPortNo)
+              );
+    		 %TCP Port no is in list
+              ( 
+              	isExprARange(TCPList),
+                atom_length(TCPList,ListLength),
+                sub_string(TCPList,HyphenIndex,1,_,'-'),
+                sub_string(TCPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(TCPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(TCPPortNo,TCPPortNum),
+                LeftNum=<TCPPortNum,
+                RightNum>=TCPPortNum
+              )
+            ).
+    		
+	isTCPDstDropped(TCPPortNo) :- 
+    	drop(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'tcp'),
+    	sub_string(X,Start,3,_,'dst'),
+    	%Start of the list of port no is same and length depends upon whether src is present or not
+    	ListStart is Start+9,
+    	(   
+          (
+          	sub_string(X,SrcStart,3,_,'src'),
+            Length is SrcStart - ListStart -1
+          )
+          ;
+          (   
+          	Length is XLength - ListStart
+          )
+        ),
+    	sub_string(X,ListStart,Length,_,TCPList),
+    		(   
+              (   
+              	sub_string(TCPList,_,_,_,TCPPortNo)
+              );
+              ( 
+              	isExprARange(TCPList),
+                atom_length(TCPList,ListLength),
+                sub_string(TCPList,HyphenIndex,1,_,'-'),
+                sub_string(TCPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(TCPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(TCPPortNo,TCPPortNum),
+                LeftNum=<TCPPortNum,
+                RightNum>=TCPPortNum
+              )
+            ).
+/*-----------------------UDP SRC and DST drop------------------*/
+isUDPSrcDropped(UDPPortNo) :- 
+    	drop(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'udp'),
+    	sub_string(X,Start,3,_,'src'),
+    	ListStart is Start+9,
+    	Length is XLength - ListStart,
+    	sub_string(X,ListStart,Length,_,UDPList),
+    		(   
+              (   
+              	sub_string(UDPList,_,_,_,UDPPortNo)
+              );
+              ( 
+              	isExprARange(UDPList),
+                atom_length(UDPList,ListLength),
+                sub_string(UDPList,HyphenIndex,1,_,'-'),
+                sub_string(UDPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(UDPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(UDPPortNo,UDPPortNum),
+                LeftNum=<UDPPortNum,
+                RightNum>=UDPPortNum
+              )
+            ).
+	isUDPDstDropped(UDPPortNo) :- 
+    	drop(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'udp'),
+    	sub_string(X,Start,3,_,'dst'),
+    	ListStart is Start+9,
+    	(   
+          (
+          	sub_string(X,SrcStart,3,_,'src'),
+            Length is SrcStart - ListStart -1
+          )
+          ;
+          (   
+          	Length is XLength - ListStart
+          )
+        ),
+    	sub_string(X,ListStart,Length,_,UDPList),
+    		(   
+              (   
+              	sub_string(UDPList,_,_,_,UDPPortNo)
+              );
+              ( 
+              	isExprARange(UDPList),
+                atom_length(UDPList,ListLength),
+                sub_string(UDPList,HyphenIndex,1,_,'-'),
+                sub_string(UDPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(UDPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(UDPPortNo,UDPPortNum),
+                LeftNum=<UDPPortNum,
+                RightNum>=UDPPortNum
+              )
+            ).
+
+isIPV6SrcDropped(IPV6SrcAddr) :- 
+    drop(X),
+    sub_string(X,_,4,_,'ipv6'),
+    atom_length(X,XLength),
+    (
+    /*------------ipv6 src addr or ipv6 src addr dst addr--------------*/
+    (
+      sub_string(X,SrcStart,3,_,'src'),
+      Start is SrcStart + 9,
+      (
+      	/*-----------ipv6 src addr dst addr---------------*/
+      	(   
+        	sub_string(X,DstStart,3,_,'dst'),
+            Length is DstStart - SrcStart -1
+        )
+        ;
+      	(   
+        	/*-------------ipv6 src addr only----------------*/
+        	not(sub_string(X,_,3,_,'dst')),
+            Length is XLength - Start
+        )
+      ),
+      sub_string(X,Start,Length,_,IPSrcList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+     ;
+    /*----------ipv6 addr----------*/
+    (   
+    	sub_string(X,AddrLocn,_,_,'addr'),
+        not(sub_string(X,_,_,_,'src')),
+        not(sub_string(X,_,_,_,'dst')),
+        Start is AddrLocn + 5,
+        Length is XLength - Start,
+     	sub_string(X,Start,Length,_,IPSrcList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+    ).
+    
+
+isIPV6DstDropped(IPV6DstAddr) :- 
+    drop(X),
+    sub_string(X,_,4,_,'ipv6'),
+    atom_length(X,XLength),
+    (
+    /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
+    (
+      sub_string(X,_,3,_,'src'),
+      sub_string(X,DstStart,3,_,'dst'),
+      Start is DstStart + 9,
+      (
+      	/*-----------ipv6 src addr dst addr or---------------*/
+        	/*-------------ipv6 src addr only, length remains same----------------*/
+            (
+            	not(sub_string(X,_,_,_,'proto')),
+            	Length is XLength - Start
+            )
+      		;
+      		(   
+            	sub_string(X,ProtoIndex,_,_,'proto'),
+                Length is ProtoIndex-DstStart+1
+            )
+      ),
+      sub_string(X,Start,Length,_,IPDstList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPDstList,_,_,_,IPV6DstAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+     ;
+    /*----------ipv6 addr----------*/
+    (   
+    	sub_string(X,AddrLocn,_,_,'addr'),
+        not(sub_string(X,_,_,_,'src')),
+        not(sub_string(X,_,_,_,'dst')),
+        Start is AddrLocn + 5,
+        Length is XLength - Start,
+     	sub_string(X,Start,Length,_,IPDstList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPDstList,_,_,_,IPV6DstAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+    ).
+isICMPTypeDropped(Type) :- 
+    drop(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmp'),
+    not(sub_string(X,_,_,_,'icmpv6')),
+    sub_string(X,StartTemp,_,_,'type'),
+    Start is StartTemp + 5,
+    (
+    	(
+        	sub_string(X,CodeStart,_,_,'code'),
+            Length is CodeStart - Start - 1
+        )
+    	;   
+    	(   
+        	not(sub_string(X,_,_,_,'code')),
+            Length is XLength - Start
+        )
+    ),
+    sub_string(X,Start,Length,_,Type).
+    
+isICMPCodeDropped(Code) :- 
+    drop(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmp'),
+    not(sub_string(X,_,_,_,'icmpv6')),
+    sub_string(X,StartTemp,_,_,'code'),
+    Start is StartTemp + 5,
+    (
+            Length is XLength - Start
+    ),
+    sub_string(X,Start,Length,_,Code).
+/*----------------ICMPV6 type and code dropped------------------*/
+isICMPV6TypeDropped(Type) :- 
+    drop(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmpv6'),
+    sub_string(X,StartTemp,_,_,'type'),
+    Start is StartTemp + 5,
+    (
+    	(
+        	sub_string(X,CodeStart,_,_,'code'),
+            Length is CodeStart - Start - 1
+        )
+    	;   
+    	(   
+        	not(sub_string(X,_,_,_,'code')),
+            Length is XLength - Start
+        )
+    ),
+    sub_string(X,Start,Length,_,Type).
+    
+isICMPV6CodeDropped(Code) :- 
+    drop(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmpv6'),
+    sub_string(X,StartTemp,_,_,'code'),
+    Start is StartTemp + 5,
+    (
+            Length is XLength - Start
+    ),
+    sub_string(X,Start,Length,_,Code).
+
+/*
+ * 
+ * Query to check if a adapter is dropped
+ * isAdapterDropped("A"),!. //This ! tells prolog to stop looking after u find a match
+ */ 
+isExprAList(X) :- chPresentInStr(',',X).
+isExprARange(X) :- chPresentInStr('-',X).
+isExprADiscrValue(X) :- not(isExprAList(X)),not(isExprARange(X)).
+chPresentInStr(Ch,Str) :- sub_atom_icasechk(Str,_,Ch).
+
+
+
