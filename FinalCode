@@ -50,12 +50,18 @@ accept('ether proto 127').
 accept('ether proto asd').
 accept('ether proto 0x6dd').
 accept('ether vid 2').
-accept('ether vid 6-19 proto 1111').
-accept('ether vid 5 proto 117').
-accept('adapter any').
+accept('ether vid 20-191 proto 1111').
+accept('ether vid 5,4,1,8 proto 117').
+accept('adapter C,F,K').
 accept('adapter A').
-accept('adapter D,E').
+accept('adapter L-P').
 accept('adapter any').
+accept('ip src addr 172.12.12.2,11.21.11').
+accept('ip dst addr 122.12.12.2').
+accept('ip addr 172.2.12.2,123.121.11').
+accept('ip proto tcp').
+accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+
 
 /*------------Rule to see if adapter is acceptable------------*/
 isAdapterAccepted(AdapterName) :- 
@@ -86,15 +92,14 @@ isProtocolIDAccepted(ProtocolId) :-
     (
       (
         sub_string(X,0,11,_,'ether proto'),
-        sub_string(X,12,_,_,PresentProtocolID),
+        sub_string(X,_,_,_,PresentProtocolID),
         PresentProtocolID = ProtocolId
       )
     	;
       (   
           sub_string(X,Index,_,_,'proto'),
           Index >= 7,
-          Start is Index+6,
-          sub_string(X,Start,_,_,PresentProtocolID),
+          sub_string(X,_,_,_,PresentProtocolID),
           PresentProtocolID = ProtocolId
       )
     ).
@@ -106,7 +111,8 @@ isVlanIDAccepted(VlanId) :-
     (   
       (
           sub_string(X,Start,_,_,PresentVlanID),
-          Start >= 10,
+          sub_string(X,ProtoIndex,5,_,'proto'),
+          Start<ProtoIndex,
           PresentVlanID = VlanId
       )
       ;
@@ -124,13 +130,77 @@ isVlanIDAccepted(VlanId) :-
           sub_string(Range,Start4,_,0,_),
           atom_number(LeftOfRange,LeftNum),
           atom_number(RightOfRange,RightNum),
-          LeftNum=<VlanId,
-          RightNum>=VlanId
+          atom_number(VlanId,VlanIdNum),
+          LeftNum=<VlanIdNum,
+          RightNum>=VlanIdNum
       )
     ).
- 
 
+	isSrcIPAccepted(SrcIP) :- 
+    	accept(X),
+    	atom_length(X,XLength),
+    	sub_string(X,0,2,_,'ip'),
+    	(
+          (
+            sub_string(X,SrcIndex,3,_,'src'),
+            Start1 is SrcIndex+9,
+                (   
+                  (
+                    sub_string(X,Start2,1,_,' '),
+                    Start2 >= Start1,
+                    Length is Start2-Start1,
+                    sub_string(X,Start1,Length,_,SrcIPList),
+                    sub_string(SrcIPList,_,_,_,SrcIP)
+                  );
+                 (
+                     not(sub_string(X,_,3,_,'dst')),
+                     sub_string(X,_,3,_,'src'),
+                     StrLen is XLength - Start1,
+                     sub_string(X,Start1,StrLen,_,SrcIPList),
+                     sub_string(SrcIPList,_,_,_,SrcIP)
+                 )
+               )
+          );
+           (   
+                not(sub_string(X,_,3,_,'dst')),
+                not(sub_string(X,_,3,_,'src')),
+                sub_string(X,Start,4,_,'addr'),
+                Start2 is Start+5,
+               	StrLen is XLength - Start2,
+                sub_string(X,Start2,StrLen,_,PresentIPList),
+                sub_string(PresentIPList,_,_,_,SrcIP)
+           )).
 
+    isDstIPAccepted(SrcIP) :- 
+            accept(X),
+            sub_string(X,0,2,_,'ip'),
+            (
+              (
+                sub_string(X,SrcIndex,3,_,'src'),
+                Start1 is SrcIndex+9,
+                    (   
+                      (
+                        sub_string(X,Start2,1,_,' '),
+                        Start2 >= Start1,
+                        Length is Start2-Start1,
+                        sub_string(X,Start1,Length,_,SrcIP)
+                      );
+                     (
+                         not(sub_string(X,_,3,_,'dst')),
+                         sub_string(X,_,3,_,'src'),
+                         atom_length(X,XLength),
+                         StrLen is XLength - Start1,
+                         sub_string(X,Start1,StrLen,_,SrcIP)
+                     )
+                   )
+              );
+               (   
+                    not(sub_string(X,_,3,_,'dst')),
+                    not(sub_string(X,_,3,_,'src')),
+                    sub_string(X,_,4,_,'addr'),
+                    sub_string(X,_,_,_,PresentIP),
+                    PresentIP = SrcIP
+               )).
 /*
  * 
  * Query to check if a adapter is accepted
