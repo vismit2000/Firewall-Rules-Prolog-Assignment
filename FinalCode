@@ -50,7 +50,7 @@ accept('ether proto 127').
 accept('ether proto asd').
 accept('ether proto 0x6dd').
 accept('ether vid 2').
-accept('ether vid 6-19').
+accept('ether vid 6-19 proto 1111').
 accept('ether vid 5 proto 117').
 accept('adapter any').
 accept('adapter A').
@@ -99,24 +99,40 @@ isProtocolIDAccepted(ProtocolId) :-
       )
     ).
 
+/*------------Rule to see if VlanID is acceptable------------*/
 isVlanIDAccepted(VlanId) :- 
     accept(X),
     sub_string(X,0,9,_,'ether vid'),
-    (
-    	sub_string(X,Start,_,_,PresentVlanID),
-        Start >= 10,
-    	PresentVlanID = VlanId
-    )
-    ;
-    (
-    	sub_string(X,10,_,_,PresentVlanID),
-        isExprARange(X),
-	    PresentVlanID = VlanId
+    (   
+      (
+          sub_string(X,Start,_,_,PresentVlanID),
+          Start >= 10,
+          PresentVlanID = VlanId
+      )
+      ;
+      (
+          sub_string(X,10,Len,_,Range),
+          isExprARange(Range),
+          Start is 10+Len,
+          sub_string(X,Start,1,_,' '),
+          sub_string(Range,0,Len2,_,LeftOfRange),
+          Start2 is 1+Len2,
+          not(sub_string(Range,Start2,1,_,'-')),
+          Start3 is Start2,
+          sub_string(Range,Start3,Len3,_,RightOfRange),
+          Start4 is 1+Len3,
+          sub_string(Range,Start4,_,0,_),
+          atom_number(LeftOfRange,LeftNum),
+          atom_number(RightOfRange,RightNum),
+          LeftNum=<VlanId,
+          RightNum>=VlanId
+      )
     ).
  
-/*------------Rule to see if VlanID is acceptable------------*/
+
 
 /*
+ * 
  * Query to check if a adapter is accepted
  * isAdapterAccepted("A"),!. //This ! tells prolog to stop looking after u find a match
  */ 
