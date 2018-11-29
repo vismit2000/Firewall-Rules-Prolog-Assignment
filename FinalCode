@@ -202,7 +202,27 @@ isVlanIDAccepted(VlanId) :-
                     PresentIP = SrcIP
                )).
 
-	isIPInRange(IP,Range) :- 
+
+	insert(X,[],[X]).
+	insert(X,[H|Tail],[H|NewTail]):-
+    X>H,
+    insert(X,Tail,NewTail).
+
+    cnvrtStrListToNumList(IPContents,IPContentsList) :-
+        [Elem1|RemPart1] = IPContents,
+        [Elem2|RemPart2] = RemPart1,
+        [Elem3|RemPart3] = RemPart2,
+        [Elem4|_] = RemPart3,
+        atom_number(Elem1,NewElem1),
+        atom_number(Elem2,NewElem2),
+        atom_number(Elem3,NewElem3),
+        atom_number(Elem4,NewElem4),
+        insert(NewElem1,[],W), 
+        insert(NewElem2,W,X),
+        insert(NewElem3,X,Y),
+        insert(NewElem4,Y,IPContentsList).
+
+	isIPInRange(IP,Range,LeftIPContents,RightIPContents,GivenIPContents) :- 
     	isExprARange(Range),
     	sub_string(Range,HyphenIndex,1,_,'-'),
     	atom_length(Range,RangeLength),
@@ -213,18 +233,8 @@ isVlanIDAccepted(VlanId) :-
     	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP),
     	split_string(LeftIP,".","", LeftIPContents),
     	split_string(RightIP,".","", RightIPContents),
-    	split_string(IP,".","", GivenIPContents),
-    	cnvrtStrListToNumList(LeftIPContents,LeftIPContentsList),
-    	cnvrtStrListToNumList(RightIPContents,RightIPContentsList),
-    	cnvrtStrListToNumList(GivenIPContents,GivenIPContentsList),
-    	isIPALessThanB(LeftIPContentsList,GivenIPContentsList),
-    	isIPALessThanB(GivenIPContentsList,RightIPContentsList).
-	
-	cnvrtStrListToNumList(IPContents,IPContentsList) :-
-    [Part1|RemPart1] = IPContents,
-    [Part2|RemPart2] = RemPart1,
-    [Part3|RemPart3] = RemPart2,
-    [Part4|_] = RemPart3,
+    	split_string(IP,".","", GivenIPContents).
+  
 
 	isIPALessThanB(IP_A,IP_B) :- 
     	[H1|T1] = IP_A,
