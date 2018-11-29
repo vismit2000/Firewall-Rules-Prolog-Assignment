@@ -45,10 +45,18 @@ vlanId(Packet_Name,VlanId) :-
 packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
 
 /*-----------Rule Base-----------*/
-reject('adapter A').
-reject('adapter D,E').
-accept('adapter A-G').
-drop('adapter any').
+accept('ether proto 187').
+accept('ether proto 127').
+accept('ether proto asd').
+accept('ether proto 0x6dd').
+accept('ether vid 2').
+accept('ether vid 6-19').
+accept('ether vid 5 proto 117').
+accept('adapter any').
+accept('adapter A').
+accept('adapter D,E').
+accept('adapter any').
+
 /*------------Rule to see if adapter is acceptable------------*/
 isAdapterAccepted(AdapterName) :- 
     accept(X),
@@ -72,6 +80,41 @@ isAdapterAccepted(AdapterName) :-
       sub_string(X,8,3,_,'any')
     )
     ).
+/*------------Rule to see if ProtocolID is acceptable------------*/
+isProtocolIDAccepted(ProtocolId) :- 
+    accept(X),
+    (
+      (
+        sub_string(X,0,11,_,'ether proto'),
+        sub_string(X,12,_,_,PresentProtocolID),
+        PresentProtocolID = ProtocolId
+      )
+    	;
+      (   
+          sub_string(X,Index,_,_,'proto'),
+          Index >= 7,
+          Start is Index+6,
+          sub_string(X,Start,_,_,PresentProtocolID),
+          PresentProtocolID = ProtocolId
+      )
+    ).
+
+isVlanIDAccepted(VlanId) :- 
+    accept(X),
+    sub_string(X,0,9,_,'ether vid'),
+    (
+    	sub_string(X,Start,_,_,PresentVlanID),
+        Start >= 10,
+    	PresentVlanID = VlanId
+    )
+    ;
+    (
+    	sub_string(X,10,_,_,PresentVlanID),
+        isExprARange(X),
+	    PresentVlanID = VlanId
+    ).
+ 
+/*------------Rule to see if VlanID is acceptable------------*/
 
 /*
  * Query to check if a adapter is accepted
@@ -80,7 +123,6 @@ isAdapterAccepted(AdapterName) :-
 isExprAList(X) :- chPresentInStr(',',X).
 isExprARange(X) :- chPresentInStr('-',X).
 isExprADiscrValue(X) :- not(isExprAList(X)),not(isExprARange(X)).
-
 chPresentInStr(Ch,Str) :- sub_atom_icasechk(Str,_,Ch).
 
 
