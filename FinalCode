@@ -202,7 +202,8 @@ isVlanIDAccepted(VlanId) :-
                     PresentIP = SrcIP
                )).
 
-	isIpInRange(_,Range,LeftIPContents,RightIPContents) :- 
+	isIPInRange(IP,Range) :- 
+    	isExprARange(Range),
     	sub_string(Range,HyphenIndex,1,_,'-'),
     	atom_length(Range,RangeLength),
     	LeftIPLength is HyphenIndex,
@@ -211,8 +212,20 @@ isVlanIDAccepted(VlanId) :-
     	RightIPIndex is HyphenIndex+1,
     	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP),
     	split_string(LeftIP,".","", LeftIPContents),
-    	split_string(RightIP,".","", RightIPContents).
+    	split_string(RightIP,".","", RightIPContents),
+    	split_string(IP,".","", GivenIPContents),
+    	cnvrtStrListToNumList(LeftIPContents,LeftIPContentsList),
+    	cnvrtStrListToNumList(RightIPContents,RightIPContentsList),
+    	cnvrtStrListToNumList(GivenIPContents,GivenIPContentsList),
+    	isIPALessThanB(LeftIPContentsList,GivenIPContentsList),
+    	isIPALessThanB(GivenIPContentsList,RightIPContentsList).
 	
+	cnvrtStrListToNumList(IPContents,IPContentsList) :-
+    [Part1|RemPart1] = IPContents,
+    [Part2|RemPart2] = RemPart1,
+    [Part3|RemPart3] = RemPart2,
+    [Part4|_] = RemPart3,
+
 	isIPALessThanB(IP_A,IP_B) :- 
     	[H1|T1] = IP_A,
     	[H2|T2] = IP_B,
