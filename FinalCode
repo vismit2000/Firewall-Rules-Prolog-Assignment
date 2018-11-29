@@ -205,7 +205,6 @@ isVlanIDAccepted(VlanId) :-
 
 	insert(X,[],[X]).
 	insert(X,[H|Tail],[H|NewTail]):-
-    X>H,
     insert(X,Tail,NewTail).
 
     cnvrtStrListToNumList(IPContents,IPContentsList) :-
@@ -222,7 +221,7 @@ isVlanIDAccepted(VlanId) :-
         insert(NewElem3,X,Y),
         insert(NewElem4,Y,IPContentsList).
 
-	isIPInRange(IP,Range,LeftIPContents,RightIPContents,GivenIPContents) :- 
+	isIPInRange(IP,Range) :- 
     	isExprARange(Range),
     	sub_string(Range,HyphenIndex,1,_,'-'),
     	atom_length(Range,RangeLength),
@@ -233,7 +232,12 @@ isVlanIDAccepted(VlanId) :-
     	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP),
     	split_string(LeftIP,".","", LeftIPContents),
     	split_string(RightIP,".","", RightIPContents),
-    	split_string(IP,".","", GivenIPContents).
+    	split_string(IP,".","", GivenIPContents),
+    	cnvrtStrListToNumList(LeftIPContents,LeftIPContentsList),
+    	cnvrtStrListToNumList(GivenIPContents,GivenIPContentsList),
+    	cnvrtStrListToNumList(RightIPContents,RightIPContentsList),
+    	isIPALessThanB(LeftIPContentsList,GivenIPContentsList),
+    	isIPALessThanB(GivenIPContentsList,RightIPContentsList).
   
 
 	isIPALessThanB(IP_A,IP_B) :- 
