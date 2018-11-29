@@ -70,6 +70,13 @@ accept('udp dst port 4-10').
 accept('udp dst port 6').
 accept('udp dst port 4500,3456 src port 456,234,12').
 
+accept('ipv6 src addr FF01:0:0:0:0:0:0:101').
+accept('ipv6 src addr 1:0:0:0:0:0:0:101').
+accept('ipv6 dst addr 12AB:0:0:CD30::/60').
+accept('ipv6 addr 1:0:0:0:0:0:0:200').
+accept('ipv6 proto ftp').
+accept('ipv6 src addr 1:0:0:0:0:0:0:20 dst addr 12AB:0:0:CD30::/60').
+accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3').
 
 
 /*------------Rule to see if adapter is acceptable------------*/
@@ -513,21 +520,21 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
         ;
       	(   
         	/*-------------ipv6 src addr only----------------*/
-        	not(sub_string(X,DstStart,3,_,'dst')),
+        	not(sub_string(X,_,3,_,'dst')),
             Length is XLength - SrcStart
         )
-      )
+      ),
       sub_string(X,Start,Length,_,IPSrcList),
         (
         /*---------Direct Match (discrete atom or list of values)--------*/
           (   
           	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
           )
-          ;
+          /*;*/
         /*---------Range of Values------------*/
-          ( 
+          /*( 
           
-          )
+          )*/
         )
     )
      ;
@@ -544,14 +551,14 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
           (   
           	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
           )
-          ;
+          /*;*/
         /*---------Range of Values------------*/
-          ( 
+          /*( 
           
-          )
+          )*/
         )
     )
-    )
+    ).
     
 
 /*
