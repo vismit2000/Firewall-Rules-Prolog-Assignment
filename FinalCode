@@ -1,3 +1,11 @@
+/*----------------NEW CODE----------------------*/
+/*-----------------Rules------------------*/
+
+/*
+ * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ */
+
+
 src_ip(Packet_Name,Src_IP) :- 
     packet(Packet_Name,List),
     [Src_IP|_]=List.
@@ -36,43 +44,39 @@ vlanId(Packet_Name,VlanId) :-
 
 packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
 
-/*-----------RULE BASE--------------*/
-accept('adapter A').
-accept('adapter D,E,F').
-reject('adapter B-C').
+/*-----------Rule Base-----------*/
+reject('adapter A').
+reject('adapter D,E').
+accept('adapter A-G').
 drop('adapter any').
-
 /*------------Rule to see if adapter is acceptable------------*/
-isadapterAccepted(AcceptedAdapter) :- 
+isAdapterAccepted(AdapterName) :- 
     accept(X),
-    sub_string(X,7,_,_,AcceptedAdapter),
-    AcceptedAdapter \= "",
-    AcceptedAdapter \= " ".
+    sub_string(X,0,7,_,'adapter'),
+    (
+    (
+     sub_string(X,_,_,_,AdapterNamePresent),
+     AdapterNamePresent=AdapterName
+    );
+    (
+     isExprARange(X),
+     sub_string(X,8,1,_,LeftOfRange),
+     sub_string(X,10,1,_,RightOfRange),
+     char_code(LeftOfRange,LeftOfRangeAscii),
+     char_code(RightOfRange,RightOfRangeAscii),
+     char_code(AdapterName,AdapterAscii),
+     AdapterAscii>=LeftOfRangeAscii,
+     AdapterAscii=<RightOfRangeAscii
+    );
+    (   
+      sub_string(X,8,3,_,'any')
+    )
+    ).
 
-/*isAdapterDiscr(X) :-
-  isAdapterList(X) :-
-  isAdapterRange(X) :-
+/*
+ * Query to check if a adapter is accepted
+ * isAdapterAccepted("A"),!. //This ! tells prolog to stop looking after u find a match
  */ 
-
-
-accept('ether vid 2').
-reject('ether vid 5-19').
-drop('ether proto 0x6dd').
-accept('ether proto 187').
-accept('ether proto 127').
-accept('ether proto asd').
-accept('ether vlan 5 proto 187').
-
-
-accept('ip src addr 172.12.12.2').
-accept('ip dst addr 122.12.12.2').
-accept('ip addr 172.2.12.2').
-accept('ip proto tcp').
-accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
-
-
-/*-----Rules to check if an expression is a list or a discrete value or a list*/
-
 isExprAList(X) :- chPresentInStr(',',X).
 isExprARange(X) :- chPresentInStr('-',X).
 isExprADiscrValue(X) :- not(isExprAList(X)),not(isExprARange(X)).
