@@ -76,7 +76,9 @@ accept('ipv6 dst addr 12AB:0:0:CD30::/60').
 accept('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
 accept('ipv6 proto ftp').
 accept('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3').
+accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
+accept('icmpv6 type ftp').
+accept('icmpv6 type tcp code 1223').
 
 
 /*------------Rule to see if adapter is acceptable------------*/
@@ -560,6 +562,102 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
     )
     ).
     
+
+isIPV6DstAccepted(IPV6DstAddr) :- 
+    accept(X),
+    sub_string(X,_,4,_,'ipv6'),
+    atom_length(X,XLength),
+    (
+    /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
+    (
+      sub_string(X,_,3,_,'src'),
+      sub_string(X,DstStart,3,_,'dst'),
+      Start is DstStart + 9,
+      (
+      	/*-----------ipv6 src addr dst addr or---------------*/
+        	/*-------------ipv6 src addr only, length remains same----------------*/
+            (
+            	not(sub_string(X,_,_,_,'proto')),
+            	Length is XLength - Start
+            )
+      		;
+      		(   
+            	sub_string(X,ProtoIndex,_,_,'proto'),
+                Length is ProtoIndex-DstStart+1
+            )
+      ),
+      sub_string(X,Start,Length,_,IPDstList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPDstList,_,_,_,IPV6DstAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+     ;
+    /*----------ipv6 addr----------*/
+    (   
+    	sub_string(X,AddrLocn,_,_,'addr'),
+        not(sub_string(X,_,_,_,'src')),
+        not(sub_string(X,_,_,_,'dst')),
+        Start is AddrLocn + 5,
+        Length is XLength - Start,
+     	sub_string(X,Start,Length,_,IPDstList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPDstList,_,_,_,IPV6DstAddr)
+          )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
+        )
+    )
+    ).
+isICMPTypeAccepted(Type) :- 
+    accept(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmp'),
+    sub_string(X,StartTemp,_,_,'type'),
+    Start is StartTemp + 5,
+    (
+    	(
+        	sub_string(X,CodeStart,_,_,'code'),
+            Length is CodeStart - Start - 1
+        )
+    	;   
+    	(   
+        	not(sub_string(X,_,_,_,'code')),
+            Length is XLength - Start
+        )
+    ),
+    sub_string(X,Start,Length,_,Type).
+    
+isICMPCodeAccepted(Code) :- 
+    accept(X),
+    atom_length(X,XLength),
+    sub_string(X,_,_,_,'icmp'),
+    sub_string(X,StartTemp,_,_,'type'),
+    Start is StartTemp + 5,
+    (
+    	(
+        	sub_string(X,CodeStart,_,_,'code'),
+            Length is CodeStart - Start - 1
+        )
+    	;   
+    	(   
+        	not(sub_string(X,_,_,_,'code')),
+            Length is XLength - Start
+        )
+    ),
+    sub_string(X,Start,Length,_,Type).
 
 /*
  * 
