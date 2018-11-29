@@ -57,9 +57,9 @@ accept('adapter A').
 accept('adapter L-P').
 accept('adapter any').
 
-accept('ip addr 172.12.12.2').
-accept('ip addr 190.11.12.2,217.21.11.2,1.2.3.4').
-accept('ip addr 72.12.12.2-100.21.11.2').
+accept('ip dst addr 172.12.12.2').
+accept('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
+accept('ip dst addr 72.12.12.2-100.21.11.2').
 
 accept('ip dst addr 122.12.12.2').
 accept('ip addr 172.2.12.2,123.121.11').
@@ -207,6 +207,95 @@ isVlanIDAccepted(VlanId) :-
                       )
            )
         ).
+
+
+/*------------------DST IP--------------------*/
+	isDstIPAccepted(DstIP) :- 
+    	accept(X),
+    	atom_length(X,XLength),
+    	sub_string(X,0,2,_,'ip'),
+    	(
+  /*------------dst ip syntax:- ip dst addr or src addr dst addr----------*/
+          (
+            sub_string(X,_,3,_,'dst'),
+                (   
+                /*---------both src and dst addr present------*/
+                sub_string(X,SrcIndex,3,_,'src'),
+            	Start1 is SrcIndex+9,
+                  (
+                    sub_string(X,Start2,1,_,' '),
+                    Start2 >= Start1,
+                     DstStart is Start2 + 10,
+                    (
+                      (   
+                      	sub_string(X,ProtoIndex,_,_,'proto'),
+                      	Length is ProtoIndex-DstStart+1
+                      )
+                      ;
+                      (   
+                        not(sub_string(X,_,_,_,'proto')),
+                        Length is XLength - DstStart
+                      )  
+                    ),
+                    sub_string(X,DstStart,Length,_,DstIPList),
+                      (   
+                      /*-------Checking if there is a range------*/
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      /*-------Checking if there is a direct match(i.e. discrete or list)------*/
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+
+                  );
+                /*-----------only dst addr present------------*/
+                 (
+                     not(sub_string(X,_,3,_,'src')),
+                     sub_string(X,_,3,_,'dst'),
+                     sub_string(X,DstStart,3,_,'dst'),
+                     StrLen is XLength - DstStart,
+                     sub_string(X,DstStart,StrLen,_,DstIPList),
+                     (   
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+                 )
+               )
+          );
+        /*--------deals with the case when only addr is written-------*/
+           (   
+                not(sub_string(X,_,3,_,'dst')),
+                not(sub_string(X,_,3,_,'src')),
+                sub_string(X,Start,4,_,'addr'),
+                Start2 is Start+5,
+               	StrLen is XLength - Start2,
+                sub_string(X,Start2,StrLen,_,DstIPList),
+               	(   
+                      	(
+                        	isExprARange(DstIPList),
+                            isIPInRange(DstIP,DstIPList)
+                        )
+                      	;
+                      	(
+                    		sub_string(DstIPList,_,_,_,DstIP)                        	
+                        )
+                      )
+           )
+        ).
+
+
+
+
 /*----------function to insert element in a list---------*/
 	insert(X,[],[X]).
 	insert(X,[H|Tail],[H|NewTail]):-
