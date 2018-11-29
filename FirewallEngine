@@ -1,0 +1,128 @@
+Engine
+
+printStatus(X) :- 
+    (
+    	printReject(X),
+        write('Packet Rejected')
+    );
+    (   
+    	not(printReject(X)),
+        printDrop(X),
+        write('Packet Dropped')
+    );
+    (
+    	not(printReject(X)),
+        not(printDrop(X)),
+        printAccept(X),
+        write('Packet Accepted')
+    ).
+
+printReject(X) :-
+    (   
+    	src_ip(X,Src_IP),
+    	isSrcIPRejected(Src_IP)
+    );
+    (   
+    	dest_ip(X, Dest_IP),
+        isDstIPRejected(Dest_IP)
+    );
+    (   
+    	adapter_num(X,Adap),
+        isAdapterRejected(Adap)
+    );
+    (   
+    	protocol_type(X,Protocol),
+        isProtocolIDRejected(Protocol)
+    );
+    (   
+    	port_num(X,Port),
+        isPortNumRejected(Port)			/*Check*/
+    );
+    (   
+    	icmpv6_type(X, IC6),
+        isIcmpv6TypeRejected(IC6)		/*Check*/
+    );
+    (   
+    	icmpv6_msgCode(X,Msg),
+        isIcmpv6MsgCodeRejected(Msg)	/*Check*/
+    );
+    (   
+    	vlanId(X,VLAN),					
+        isVLANRejected(VLAN)			/*Check*/
+    ).
+
+printDrop(X) :-
+    (   
+    	src_ip(X,Src_IP),
+    	isSrcIPDrop(Src_IP)
+    );
+    (   
+    	dest_ip(X, Dest_IP),
+        isDstIPDrop(Dest_IP)
+    );
+    (   
+    	adapter_num(X,Adap),
+        isAdapterDrop(Adap)
+    );
+    (   
+    	protocol_type(X,Protocol),
+        isProtocolIDDrop(Protocol)
+    );
+    (   
+    	port_num(X,Port),
+        isPortNumDrop(Port)			/*Check*/
+    );
+    (   
+    	icmpv6_type(X, IC6),
+        isIcmpv6TypeDrop(IC6)		/*Check*/
+    );
+    (   
+    	icmpv6_msgCode(X,Msg),
+        isIcmpv6MsgCodeDrop(Msg)	/*Check*/
+    );
+    (   
+    	vlanId(X,VLAN),					
+        isVLANDrop(VLAN)			/*Check*/
+    ).
+
+printAccepted(X) :-
+    (   
+    	src_ip(X,Src_IP),
+    	isSrcIPAccepted(Src_IP)
+    ),
+    (   
+    	dest_ip(X, Dest_IP),
+        isDstIPAccepted(Dest_IP)
+    ),
+    (   
+    	adapter_num(X,Adap),
+        isAdapterAccepted(Adap)
+    ),
+    (   
+    	protocol_type(X,Protocol),
+        isProtocolIDAccepted(Protocol)
+    ),
+    (   
+    	port_num(X,Port),
+        isPortNumAccepted(Port)			/*Check*/
+    ),
+    (   
+    	icmpv6_type(X, IC6),
+        isIcmpv6TypeAccepted(IC6)		/*Check*/
+    ),
+    (   
+    	icmpv6_msgCode(X,Msg),
+        isIcmpv6MsgCodeAccepted(Msg)	/*Check*/
+    ),
+    (   
+    	vlanId(X,VLAN),					
+        isVLANAccepted(VLAN)			/*Check*/
+    ).
+
+
+
+
+
+
+
+
