@@ -66,9 +66,9 @@ accept('ip addr 172.2.12.2,123.121.11').
 accept('ip proto tcp').
 accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
 
-accept('tcp dst port 4-10').
-accept('tcp dst port 6').
-accept('tcp dst port 4500,3456 src port 456,234,12').
+accept('udp dst port 4-10').
+accept('udp dst port 6').
+accept('udp dst port 4500,3456 src port 456,234,12').
 
 
 
@@ -430,6 +430,73 @@ isVlanIDAccepted(VlanId) :-
                 RightNum>=TCPPortNum
               )
             ).
+/*-----------------------UDP SRC and DST accept------------------*/
+isUDPSrcAccepted(UDPPortNo) :- 
+    	accept(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'udp'),
+    	sub_string(X,Start,3,_,'src'),
+    	ListStart is Start+9,
+    	Length is XLength - ListStart,
+    	sub_string(X,ListStart,Length,_,UDPList),
+    		(   
+              (   
+              	sub_string(UDPList,_,_,_,UDPPortNo)
+              );
+              ( 
+              	isExprARange(UDPList),
+                atom_length(UDPList,ListLength),
+                sub_string(UDPList,HyphenIndex,1,_,'-'),
+                sub_string(UDPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(UDPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(UDPPortNo,UDPPortNum),
+                LeftNum=<UDPPortNum,
+                RightNum>=UDPPortNum
+              )
+            ).
+	isUDPDstAccepted(UDPPortNo) :- 
+    	accept(X),
+    	atom_length(X,XLength),
+    	sub_string(X,_,3,_,'udp'),
+    	sub_string(X,Start,3,_,'dst'),
+    	ListStart is Start+9,
+    	(   
+          (
+          	sub_string(X,SrcStart,3,_,'src'),
+            Length is SrcStart - ListStart -1
+          )
+          ;
+          (   
+          	Length is XLength - ListStart
+          )
+        ),
+    	sub_string(X,ListStart,Length,_,UDPList),
+    		(   
+              (   
+              	sub_string(UDPList,_,_,_,UDPPortNo)
+              );
+              ( 
+              	isExprARange(UDPList),
+                atom_length(UDPList,ListLength),
+                sub_string(UDPList,HyphenIndex,1,_,'-'),
+                sub_string(UDPList,0,HyphenIndex,_,LeftOfRange),
+                StartOfRight is HyphenIndex + 1,
+                LengthOfRight is ListLength - StartOfRight,
+                sub_string(UDPList,StartOfRight,LengthOfRight,_,RightOfRange),
+                atom_number(LeftOfRange,LeftNum),
+                atom_number(RightOfRange,RightNum),
+                atom_number(UDPPortNo,UDPPortNum),
+                LeftNum=<UDPPortNum,
+                RightNum>=UDPPortNum
+              )
+            ).
+
+
+
 	/*isUDPAccepted():-.
 	isICMPAccepted():-.
 	isICMPV6Accepted():-*/
