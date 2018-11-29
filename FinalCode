@@ -201,6 +201,15 @@ isVlanIDAccepted(VlanId) :-
                     sub_string(X,_,_,_,PresentIP),
                     PresentIP = SrcIP
                )).
+
+	isIpInRange(_,Range,HyphenIndex,RangeLength,LeftIPLength,RightIPLength,LeftIP,RightIP) :- 
+    	sub_string(Range,HyphenIndex,1,_,'-'),
+    	atom_length(Range,RangeLength),
+    	LeftIPLength is HyphenIndex,
+    	RightIPLength is RangeLength-LeftIPLength-1,
+    	sub_string(Range,0,LeftIPLength,_,LeftIP),
+    	RightIPIndex is HyphenIndex+1,
+    	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP).
 /*
  * 
  * Query to check if a adapter is accepted
