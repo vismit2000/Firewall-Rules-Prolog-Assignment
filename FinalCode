@@ -495,12 +495,65 @@ isUDPSrcAccepted(UDPPortNo) :-
               )
             ).
 
+isIPV6SrcAccepted(IPV6SrcAddr) :- 
+    accept(X),
+    sub_string(X,_,4,_,'ipv6'),
+    atom_length(X,XLength),
+    (
+    /*------------ipv6 src addr or ipv6 src addr dst addr--------------*/
+    (
+      sub_string(X,SrcStart,3,_,'src'),
+      Start is SrcStart + 9,
+      (
+      	/*-----------ipv6 src addr dst addr---------------*/
+      	(   
+        	sub_string(X,DstStart,3,_,'dst'),
+            Length is DstStart - SrcStart -1
+        )
+        ;
+      	(   
+        	/*-------------ipv6 src addr only----------------*/
+        	not(sub_string(X,DstStart,3,_,'dst')),
+            Length is XLength - SrcStart
+        )
+      )
+      sub_string(X,Start,Length,_,IPSrcList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
+          )
+          ;
+        /*---------Range of Values------------*/
+          ( 
+          
+          )
+        )
+    )
+     ;
+    /*----------ipv6 addr----------*/
+    (   
+    	sub_string(X,AddrLocn,_,_,'addr'),
+        not(sub_string(X,_,_,_,'src')),
+        not(sub_string(X,_,_,_,'dst')),
+        Start is AddrLocn + 5,
+        Length is XLength - Start,
+     	sub_string(X,Start,Length,_,IPSrcList),
+        (
+        /*---------Direct Match (discrete atom or list of values)--------*/
+          (   
+          	sub_string(IPSrcList,_,_,_,IPV6SrcAddr)
+          )
+          ;
+        /*---------Range of Values------------*/
+          ( 
+          
+          )
+        )
+    )
+    )
+    
 
-
-	/*isUDPAccepted():-.
-	isICMPAccepted():-.
-	isICMPV6Accepted():-*/
- 
 /*
  * 
  * Query to check if a adapter is accepted
