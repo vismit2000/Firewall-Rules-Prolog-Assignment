@@ -220,9 +220,9 @@ isVlanIDAccepted(VlanId) :-
             sub_string(X,_,3,_,'dst'),
                 (   
                 /*---------both src and dst addr present------*/
-                sub_string(X,SrcIndex,3,_,'src'),
-            	Start1 is SrcIndex+9,
                   (
+                  	sub_string(X,SrcIndex,3,_,'src'),
+            		Start1 is SrcIndex+9,
                     sub_string(X,Start2,1,_,' '),
                     Start2 >= Start1,
                      DstStart is Start2 + 10,
@@ -255,8 +255,8 @@ isVlanIDAccepted(VlanId) :-
                 /*-----------only dst addr present------------*/
                  (
                      not(sub_string(X,_,3,_,'src')),
-                     sub_string(X,_,3,_,'dst'),
-                     sub_string(X,DstStart,3,_,'dst'),
+                     sub_string(X,DstStartTemp,3,_,'dst'),
+                     DstStart is DstStartTemp + 9,
                      StrLen is XLength - DstStart,
                      sub_string(X,DstStart,StrLen,_,DstIPList),
                      (   
