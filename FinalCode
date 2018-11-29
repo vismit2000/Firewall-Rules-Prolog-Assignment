@@ -202,14 +202,47 @@ isVlanIDAccepted(VlanId) :-
                     PresentIP = SrcIP
                )).
 
-	isIpInRange(_,Range,HyphenIndex,RangeLength,LeftIPLength,RightIPLength,LeftIP,RightIP) :- 
+	isIpInRange(_,Range,LeftIPContents,RightIPContents) :- 
     	sub_string(Range,HyphenIndex,1,_,'-'),
     	atom_length(Range,RangeLength),
     	LeftIPLength is HyphenIndex,
     	RightIPLength is RangeLength-LeftIPLength-1,
     	sub_string(Range,0,LeftIPLength,_,LeftIP),
     	RightIPIndex is HyphenIndex+1,
-    	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP).
+    	sub_string(Range,RightIPIndex,RightIPLength,_,RightIP),
+    	split_string(LeftIP,".","", LeftIPContents),
+    	split_string(RightIP,".","", RightIPContents).
+	
+	isIPALessThanB(IP_A,IP_B) :- 
+    	[H1|T1] = IP_A,
+    	[H2|T2] = IP_B,
+		[H3|T3] = T1,
+    	[H4|T4] = T2,
+		[H5|T5] = T3,
+    	[H6|T6] = T4,
+		[H7|_] = T5,
+    	[H8|_] = T6,
+     (   
+        (H1 < H2);
+    		(   
+            	( H1 = H2 ),
+                	(   
+                    	( H3<H4  );
+                    		(   
+                            	(H3=H4),
+                                	(   
+                                    	(H5<H6);
+                                    		(   
+                                            	(H5=H6),
+                                                (H7<H8)
+                                            )
+                                    )
+                            )
+                    )
+            )
+	 ).
+		
+    
 /*
  * 
  * Query to check if a adapter is accepted
