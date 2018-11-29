@@ -1,5 +1,3 @@
-/*----------------NEW CODE----------------------*/
-/*-----------------Rules------------------*/
 
 /*
  * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
@@ -45,6 +43,7 @@ vlanId(Packet_Name,VlanId) :-
 packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeBlank','protoMsgcodeBlank','idBlank']).
 
 /*-----------Rule Base-----------*/
+/*-----------Ethernet Clause-----------*/
 accept('ether proto 187').
 accept('ether proto 127').
 accept('ether proto asd').
@@ -52,24 +51,23 @@ accept('ether proto 0x6dd').
 accept('ether vid 2').
 accept('ether vid 20-191 proto 1111').
 accept('ether vid 5,4,1,8 proto 117').
+
+/*-----------Adapter Clause-----------*/
 accept('adapter C,F,K').
 accept('adapter A').
 accept('adapter L-P').
 accept('adapter any').
 
+/*-----------Ipv4 Datagram Clause-----------*/
 accept('ip dst addr 172.12.12.2').
 accept('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
 accept('ip dst addr 72.12.12.2-100.21.11.2').
-
 accept('ip dst addr 122.12.12.2').
 accept('ip addr 172.2.12.2,123.121.11').
 accept('ip proto tcp').
 accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
 
-accept('udp dst port 4-10').
-accept('udp dst port 6').
-accept('udp dst port 4500,3456 src port 456,234,12').
-
+/*-----------Ipv6 Datagram Clause-----------*/
 accept('ipv6 src addr FF01:0:0:0:0:0:0:101').
 accept('ipv6 src addr 1:0:0:0:0:0:0:101').
 accept('ipv6 dst addr 12AB:0:0:CD30::/60').
@@ -77,96 +75,116 @@ accept('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
 accept('ipv6 proto ftp').
 accept('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
 accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
-accept('icmp code 1234').
-accept('icmpv6 type tcp code 1223').
-accept('icmp code 123').
-accept('icmpv6 type tcp code 123').
 
+/*-----------TCP and UDP Conditions-----------*/
+accept('udp dst port 4-10').
+accept('udp dst port 6').
+accept('udp dst port 4500,3456 src port 456,234,12').
+
+/*-----------ICMP Conditions-----------*/
+accept('icmp code 1234').
+accept('icmp code 123').
+
+/*-----------ICMPV6 Conditions-----------*/
+accept('icmpv6 type tcp code 1223').
+accept('icmpv6 type tcp code 123').
 
 /*------------Rule to see if adapter is acceptable------------*/
 isAdapterAccepted(AdapterName) :- 
-    accept(X),
-    sub_string(X,0,7,_,'adapter'),
+    accept(X),	%Check for clauses in accept predicate
+    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
     (
-    (
-     sub_string(X,_,_,_,AdapterNamePresent),
-     AdapterNamePresent=AdapterName
-    );
-    (
-     isExprARange(X),
-     sub_string(X,8,1,_,LeftOfRange),
-     sub_string(X,10,1,_,RightOfRange),
-     char_code(LeftOfRange,LeftOfRangeAscii),
-     char_code(RightOfRange,RightOfRangeAscii),
-     char_code(AdapterName,AdapterAscii),
-     AdapterAscii>=LeftOfRangeAscii,
-     AdapterAscii=<RightOfRangeAscii
-    );
-    (   
-      sub_string(X,8,3,_,'any')
-    )
-    ).
-/*------------Rule to see if ProtocolID is acceptable------------*/
-isProtocolIDAccepted(ProtocolId) :- 
-    accept(X),
-    (
-      (
-        sub_string(X,0,11,_,'ether proto'),
-        sub_string(X,_,_,_,PresentProtocolID),
-        PresentProtocolID = ProtocolId
-      )
-    	;
-      (   
-          sub_string(X,Index,_,_,'proto'),
-          Index >= 7,
-          sub_string(X,_,_,_,PresentProtocolID),
-          PresentProtocolID = ProtocolId
-      )
+    	%There's a direct match
+	    (
+		     sub_string(X,_,_,_,AdapterNamePresent),
+		     AdapterNamePresent=AdapterName
+	    )
+	    ;
+    	%Adapter present between given range
+	    (
+		     isExprARange(X),
+		     sub_string(X,8,1,_,LeftOfRange),
+		     sub_string(X,10,1,_,RightOfRange),
+		     char_code(LeftOfRange,LeftOfRangeAscii),
+		     char_code(RightOfRange,RightOfRangeAscii),
+		     char_code(AdapterName,AdapterAscii),
+		     AdapterAscii>=LeftOfRangeAscii,
+		     AdapterAscii=<RightOfRangeAscii
+	    )
+	    ;
+    	%if any is present accept all adapters
+	    (   
+	    	 sub_string(X,8,3,_,'any')
+	    )
     ).
 
+    /*------------Rule to see if ProtocolID is acceptable------------*/
+	isProtocolIDAccepted(ProtocolId) :- 
+	    accept(X),
+	    (
+	      (
+	        sub_string(X,_,_,_,'ether proto'),	
+	        % no vlan id present in clause (ether proto and no vid)
+	        sub_string(X,_,_,_,PresentProtocolID),
+	        PresentProtocolID = ProtocolId
+	      )
+	    	;
+	      % vlan id present in clause (ether vid _ proto )
+	      (   
+	          sub_string(X,Index,_,_,'proto'),
+	          %Index>=7 signifies that vid is present too
+	          Index >= 7,
+	          %Direct match now
+	          sub_string(X,_,_,_,PresentProtocolID),
+	          PresentProtocolID = ProtocolId
+	      )
+	    ).
+
 /*------------Rule to see if VlanID is acceptable------------*/
-isVlanIDAccepted(VlanId) :- 
-    accept(X),
-    sub_string(X,0,9,_,'ether vid'),
-    (   
-      (
-          sub_string(X,Start,_,_,PresentVlanID),
-          sub_string(X,ProtoIndex,5,_,'proto'),
-          Start<ProtoIndex,
-          PresentVlanID = VlanId
-      )
-      ;
-      (
-          sub_string(X,10,Len,_,Range),
-          isExprARange(Range),
-          Start is 10+Len,
-          sub_string(X,Start,1,_,' '),
-          sub_string(Range,0,Len2,_,LeftOfRange),
-          Start2 is 1+Len2,
-          not(sub_string(Range,Start2,1,_,'-')),
-          Start3 is Start2,
-          sub_string(Range,Start3,Len3,_,RightOfRange),
-          Start4 is 1+Len3,
-          sub_string(Range,Start4,_,0,_),
-          atom_number(LeftOfRange,LeftNum),
-          atom_number(RightOfRange,RightNum),
-          atom_number(VlanId,VlanIdNum),
-          LeftNum=<VlanIdNum,
-          RightNum>=VlanIdNum
-      )
-    ).
+	isVlanIDAccepted(VlanId) :- 
+	    accept(X),
+	    sub_string(X,0,9,_,'ether vid'),
+	    (   
+	    		%direct match
+	      (
+	          sub_string(X,Start,_,_,PresentVlanID),
+	          sub_string(X,ProtoIndex,5,_,'proto'),
+	          Start<ProtoIndex,
+	          PresentVlanID = VlanId
+	      )
+	      ;
+	      (
+	    	%VId is in range format in clause(ether vid x-y)
+	          sub_string(X,10,Len,_,Range),
+	          isExprARange(Range),
+	          Start is 10+Len,
+	          sub_string(X,Start,1,_,' '),
+	          sub_string(Range,0,Len2,_,LeftOfRange),%LeftOfRange is Left number in string Format
+	          Start2 is 1+Len2,
+	          not(sub_string(Range,Start2,1,_,'-')),
+	          Start3 is Start2,
+	          sub_string(Range,Start3,Len3,_,RightOfRange),%RightOfRange same as LeftOfRange
+	          Start4 is 1+Len3,
+	          sub_string(Range,Start4,_,0,_),
+	          atom_number(LeftOfRange,LeftNum),
+	          atom_number(RightOfRange,RightNum),
+	          atom_number(VlanId,VlanIdNum),
+	          LeftNum=<VlanIdNum,	%Check if VLAn id lies within range
+	          RightNum>=VlanIdNum
+	      )
+	    ).
 /*------------------SRC IP--------------------*/
 	isSrcIPAccepted(SrcIP) :- 
     	accept(X),
-    	atom_length(X,XLength),
+    	atom_length(X,XLength),	%XLength stores length of X
     	sub_string(X,0,2,_,'ip'),
     	(
-  /*------------src ip syntax:- ip src addr or src addr dst addr----------*/
+    		%src ip syntax:- ip src addr or src addr dst addr
           (
             sub_string(X,SrcIndex,3,_,'src'),
             Start1 is SrcIndex+9,
                 (   
-                /*-----------src and dst addr(' ' signifies space before dst)------------*/
+                 %src and dst addr(' ' signifies space before dst)
                   (
                     sub_string(X,Start2,1,_,' '),
                     Start2 >= Start1,
@@ -184,7 +202,7 @@ isVlanIDAccepted(VlanId) :-
                       )
 
                   );
-                /*-----------only src addr present------------*/
+                 %only src addr present
                  (
                      not(sub_string(X,_,3,_,'dst')),
                      sub_string(X,_,3,_,'src'),
@@ -203,7 +221,7 @@ isVlanIDAccepted(VlanId) :-
                  )
                )
           );
-        /*--------deals with the case when only addr is written-------*/
+          %deals with the case when only addr is written
            (   
                 not(sub_string(X,_,3,_,'dst')),
                 not(sub_string(X,_,3,_,'src')),
@@ -225,17 +243,17 @@ isVlanIDAccepted(VlanId) :-
         ).
 
 
-/*------------------DST IP--------------------*/
+    %------DST IP
 	isDstIPAccepted(DstIP) :- 
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,0,2,_,'ip'),
     	(
-  /*------------dst ip syntax:- ip dst addr or src addr dst addr----------*/
+    %dst ip syntax:- ip dst addr or src addr dst addr 
           (
             sub_string(X,_,3,_,'dst'),
                 (   
-                /*---------both src and dst addr present------*/
+                 %both src and dst addr present
                   (
                   	sub_string(X,SrcIndex,3,_,'src'),
             		Start1 is SrcIndex+9,
@@ -378,6 +396,7 @@ isVlanIDAccepted(VlanId) :-
                     )
             )
 	 ).
+     %Checks if TCP Src is accepted
 	isTCPSrcAccepted(TCPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
@@ -387,9 +406,11 @@ isVlanIDAccepted(VlanId) :-
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,TCPList),
     		(   
+    		 %Direct Match
               (   
               	sub_string(TCPList,_,_,_,TCPPortNo)
               );
+    		 %TCP Port no is in list
               ( 
               	isExprARange(TCPList),
                 atom_length(TCPList,ListLength),
@@ -405,11 +426,13 @@ isVlanIDAccepted(VlanId) :-
                 RightNum>=TCPPortNum
               )
             ).
+    		
 	isTCPDstAccepted(TCPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
+    	%Start of the list of port no is same and length depends upon whether src is present or not
     	ListStart is Start+9,
     	(   
           (
