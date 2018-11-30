@@ -22,7 +22,7 @@ protocol_type(Packet_Name,Protocol_Type) :-
 
 port_num(Packet_Name,Port_Num) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[Port_Num|_]]]]]=List.
+    [_|[_|[_|[_|[Port_Num|_]]]]]=List.     
 
 
 icmpv6_type(Packet_Name,Icmpv6_Type) :- 
@@ -37,6 +37,38 @@ vlanId(Packet_Name,VlanId) :-
     packet(Packet_Name,List),
     [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
 
+tcpSrc(Packet_Name,TCPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]]=List.
+    
+tcpDst(Packet_Name,TCPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]]=List.
+
+udpSrc(Packet_Name,UDPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]]=List.
+    
+udpDst(Packet_Name,UDPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]]=List.
+    
+ipv6Src(Packet_Name,IPV6Src) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]]=List.      
+    
+ipv6Dst(Packet_Name,IPV6Dst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]]=List.
+
+icmpType(Packet_Name,ICMPType) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]]=List.
+
+icmpCode(Packet_Name,ICMPCode) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]]=List.
+
 
 /*----------------FACTS-------------*/
 
@@ -44,13 +76,13 @@ packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeB
 
 /*-----------Rule Base-----------*/
 /*-----------Ethernet Clause-----------*/
-drop('ether proto 187').
+drop('ether proto any').
 drop('ether proto 127').
 drop('ether proto asd').
 drop('ether proto 0x6dd').
-drop('ether vid 2').
-drop('ether vid 20-191 proto 1111').
-drop('ether vid 5,4,1,8 proto 117').
+drop('ether vid any').
+drop('ether vid 20-191 proto any').
+drop('ether vid 5 proto 117').
 
 /*-----------Adapter Clause-----------*/
 drop('adapter C,F,K').
@@ -59,37 +91,54 @@ drop('adapter L-P').
 drop('adapter any').
 
 /*-----------Ipv4 Datagram Clause-----------*/
-drop('ip dst addr 172.12.12.2').
+drop('ip src addr any proto ftp').
 drop('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
 drop('ip dst addr 72.12.12.2-100.21.11.2').
-drop('ip dst addr 122.12.12.2').
+drop('ip dst addr any').
 drop('ip addr 172.2.12.2,123.121.11').
 drop('ip proto tcp').
-drop('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+drop('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
 
 /*-----------Ipv6 Datagram Clause-----------*/
-drop('ipv6 src addr FF01:0:0:0:0:0:0:101').
-drop('ipv6 src addr 1:0:0:0:0:0:0:101').
+drop('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
+drop('ipv6 src addr any').
 drop('ipv6 dst addr 12AB:0:0:CD30::/60').
-drop('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
+drop('ipv6 addr 1:0:0:0:0:0:0:200,any').
 drop('ipv6 proto ftp').
 drop('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-drop('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
+drop('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
 
 /*-----------TCP and UDP Conditions-----------*/
-drop('udp dst port 4-10').
+drop('udp dst port any').
 drop('udp dst port 6').
-drop('udp dst port 4500,3456 src port 456,234,12').
+drop('udp dst port 4500,3456 src port 456,234,any').
 
 /*-----------ICMP Conditions-----------*/
 drop('icmp code 1234').
-drop('icmp code 123').
+drop('icmp code any').
 
 /*-----------ICMPV6 Conditions-----------*/
-drop('icmpv6 type tcp code 1223').
-drop('icmpv6 type tcp code 123').
+drop('icmpv6 type tcp code any').
+drop('icmpv6 type any code 123').
 
-/*------------Rule to see if adapter is droppable------------*/
+/*	RULE BASE SYNTAX
+ * isAdapterDropped(AdapterName) 
+ * isProtocolIDDropped(ProtocolId)
+ * isVlanIDDropped(VlanId)
+ * isSrcIPDropped(SrcIP) 
+ * isDstIPDropped(DstIP)
+ * isTCPSrcDropped(TCPPortNo)
+ * isTCPDstDropped(TCPPortNo)
+ * isUDPSrcDropped(UDPPortNo)
+ * isUDPDstDropped(UDPPortNo)
+ * isIPV6SrcDropped(IPV6SrcAddr)    
+ * isIPV6DstDropped(IPV6DstAddr)
+ * isICMPTypeDropped(Type)
+ * isICMPCodeDropped(Code)
+ * isICMPV6TypeDropped(Type)
+ * isICMPV6CodeDropped(Code)
+ * */
+/*------------Rule to see if adapter is dropable------------*/
 isAdapterDropped(AdapterName) :- 
     drop(X),	%Check for clauses in drop predicate
     sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
@@ -118,10 +167,13 @@ isAdapterDropped(AdapterName) :-
 	    )
     ).
 
-    /*------------Rule to see if ProtocolID is droppable------------*/
+    /*------------Rule to see if ProtocolID is dropable------------*/
 	isProtocolIDDropped(ProtocolId) :- 
 	    drop(X),
-	    (
+    	sub_string(X,_,_,_,'ether'),
+    	sub_string(X,_,_,_,'proto'),
+	 (   
+        (
 	      (
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
@@ -138,12 +190,19 @@ isAdapterDropped(AdapterName) :-
 	          sub_string(X,_,_,_,PresentProtocolID),
 	          PresentProtocolID = ProtocolId
 	      )
-	    ).
+	    )
+    	;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     )
+    	.
 
-/*------------Rule to see if VlanID is droppable------------*/
+/*------------Rule to see if VlanID is dropable------------*/
 	isVlanIDDropped(VlanId) :- 
-	    drop(X),
-	    sub_string(X,0,9,_,'ether vid'),
+	    drop(X),   
+         sub_string(X,0,9,_,'ether vid'),
+      (   
 	    (   
 	    		%direct match
 	      (
@@ -172,13 +231,19 @@ isAdapterDropped(AdapterName) :-
 	          LeftNum=<VlanIdNum,	%Check if VLAn id lies within range
 	          RightNum>=VlanIdNum
 	      )
-	    ).
+	    )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+         ).
 /*------------------SRC IP--------------------*/
 	isSrcIPDropped(SrcIP) :- 
     	drop(X),
-    	atom_length(X,XLength),	%XLength stores length of X
+        atom_length(X,XLength),	%XLength stores length of X
     	sub_string(X,0,2,_,'ip'),
-    	(
+    	(   
+        (
     		%src ip syntax:- ip src addr or src addr dst addr
           (
             sub_string(X,SrcIndex,3,_,'src'),
@@ -203,10 +268,20 @@ isAdapterDropped(AdapterName) :-
 
                   );
                  %only src addr present
-                 (
+                 (	
                      not(sub_string(X,_,3,_,'dst')),
                      sub_string(X,_,3,_,'src'),
-                     StrLen is XLength - Start1,
+                     (
+                     (
+                       StrLen is XLength - Start1
+                     )
+                     ;
+                     (  
+                      not(sub_string(X,_,3,_,'dst')),
+                      sub_string(X,ProtoIndex,_,_,'proto'),
+                      StrLen is ProtoIndex - Start1 -1
+                     )
+                     ),
                      sub_string(X,Start1,StrLen,_,SrcIPList),
                      (   
                       	(
@@ -240,7 +315,12 @@ isAdapterDropped(AdapterName) :-
                         )
                       )
            )
-        ).
+        )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+       ).
 
 
     %------DST IP
@@ -248,7 +328,8 @@ isAdapterDropped(AdapterName) :-
     	drop(X),
     	atom_length(X,XLength),
     	sub_string(X,0,2,_,'ip'),
-    	(
+     (   
+        (
     %dst ip syntax:- ip dst addr or src addr dst addr 
           (
             sub_string(X,_,3,_,'dst'),
@@ -325,7 +406,11 @@ isAdapterDropped(AdapterName) :-
                         )
                       )
            )
-        ).
+        );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 
 
@@ -396,12 +481,14 @@ isAdapterDropped(AdapterName) :-
                     )
             )
 	 ).
-     %Checks if TCP Src is dropped
+     %Checks if TCP Src is droped
 	isTCPSrcDropped(TCPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
+    	(
+        (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,TCPList),
@@ -425,13 +512,19 @@ isAdapterDropped(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            ));
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     		
 	isTCPDstDropped(TCPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	%Start of the list of port no is same and length depends upon whether src is present or not
     	ListStart is Start+9,
     	(   
@@ -463,13 +556,21 @@ isAdapterDropped(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            )
+        )
+       ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 /*-----------------------UDP SRC and DST drop------------------*/
 isUDPSrcDropped(UDPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
+    (   
+     (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,UDPList),
@@ -491,12 +592,20 @@ isUDPSrcDropped(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 	isUDPDstDropped(UDPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	ListStart is Start+9,
     	(   
           (
@@ -527,12 +636,20 @@ isUDPSrcDropped(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 isIPV6SrcDropped(IPV6SrcAddr) :- 
     drop(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+   (   
+    (   
     (
     /*------------ipv6 src addr or ipv6 src addr dst addr--------------*/
     (
@@ -548,7 +665,15 @@ isIPV6SrcDropped(IPV6SrcAddr) :-
       	(   
         	/*-------------ipv6 src addr only----------------*/
         	not(sub_string(X,_,3,_,'dst')),
+            not(sub_string(X,_,5,_,'proto')),
             Length is XLength - Start
+        )
+      	;
+      	(   
+        	/*-------------ipv6 src addr and proto----------------*/
+        	not(sub_string(X,_,3,_,'dst')),
+            sub_string(X,ProtoIndex,_,_,'proto'),
+            Length is ProtoIndex - Start -1
         )
       ),
       sub_string(X,Start,Length,_,IPSrcList),
@@ -585,13 +710,20 @@ isIPV6SrcDropped(IPV6SrcAddr) :-
           )*/
         )
     )
+    )
+    )
+   ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
     ).
     
-
 isIPV6DstDropped(IPV6DstAddr) :- 
     drop(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+    (   
+    (   
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
@@ -645,13 +777,21 @@ isIPV6DstDropped(IPV6DstAddr) :-
           )*/
         )
     )
-    ).
+    )
+    )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 isICMPTypeDropped(Type) :- 
     drop(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -664,7 +804,12 @@ isICMPTypeDropped(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPCodeDropped(Code) :- 
     drop(X),
@@ -672,17 +817,26 @@ isICMPCodeDropped(Code) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
-/*----------------ICMPV6 type and code dropped------------------*/
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
+/*----------------ICMPV6 type and code droped------------------*/
 isICMPV6TypeDropped(Type) :- 
     drop(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -695,22 +849,34 @@ isICMPV6TypeDropped(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPV6CodeDropped(Code) :- 
     drop(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 /*
  * 
- * Query to check if a adapter is dropped
+ * Query to check if a adapter is droped
  * isAdapterDropped("A"),!. //This ! tells prolog to stop looking after u find a match
  */ 
 isExprAList(X) :- chPresentInStr(',',X).
