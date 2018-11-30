@@ -22,7 +22,7 @@ protocol_type(Packet_Name,Protocol_Type) :-
 
 port_num(Packet_Name,Port_Num) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[Port_Num|_]]]]]=List.
+    [_|[_|[_|[_|[Port_Num|_]]]]]=List.     
 
 
 icmpv6_type(Packet_Name,Icmpv6_Type) :- 
@@ -36,6 +36,38 @@ icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :-
 vlanId(Packet_Name,VlanId) :- 
     packet(Packet_Name,List),
     [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
+
+tcpSrc(Packet_Name,TCPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]]=List.
+    
+tcpDst(Packet_Name,TCPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]]=List.
+
+udpSrc(Packet_Name,UDPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]]=List.
+    
+udpDst(Packet_Name,UDPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]]=List.
+    
+ipv6Src(Packet_Name,IPV6Src) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]]=List.      
+    
+ipv6Dst(Packet_Name,IPV6Dst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]]=List.
+
+icmpType(Packet_Name,ICMPType) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]]=List.
+
+icmpCode(Packet_Name,ICMPCode) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]]=List.
 
 
 /*----------------FACTS-------------*/
