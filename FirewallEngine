@@ -45,30 +45,37 @@ printReject(X) :-
         isVlanIDRejected(VLAN)			
     );
     (
-    
+    	tcpSrc(X,TCPPortNo),
+    	isTCPSrcRejected(TCPPortNo)
     );
     (   
-    
+    	dstSrc(X,TCPPortNo),
+    	isTCPDstRejected(TCPPortNo)
     );
     ( 
-    
+    	udpSrc(X,UDPPortNo),
+   		isUDPSrcRejected(UDPPortNo) 
     );
     (   
-    
+    	udpDst(X,UDPPortNo),
+   		isUDPDstRejected(UDPPortNo) 
     );
     (  
-    
+    	ipv6Src(X,IPV6SrcAddr),
+   		isIPV6SrcRejected(IPV6SrcAddr) 
+    );
+    (   
+    	ipv6Dst(X,IPV6DstAddr),
+    	isIPV6DstRejected(IPV6DstAddr)
+    );
+    (   
+    	icmpType(X,Type),
+    	isICMPTypeRejected(Type)
+    );
+    (   
+    	icmpCode(X,Code),
+    	isICMPCodeRejected(Code)
     ).
-/* 
- * isTCPSrcRejected(TCPPortNo)
- * isTCPDstRejected(TCPPortNo)
- * isUDPSrcRejected(UDPPortNo)
- * isUDPDstRejected(UDPPortNo)
- * isIPV6SrcRejected(IPV6SrcAddr)    
- * isIPV6DstRejected(IPV6DstAddr)
- * isICMPTypeRejected(Type)
- * isICMPCodeRejected(Code)
- * */
 printDrop(X) :-
     (   
     	src_ip(X,Src_IP),
@@ -87,60 +94,108 @@ printDrop(X) :-
         isProtocolIDDrop(Protocol)
     );
     (   
-    	port_num(X,Port),
-        isPortNumDrop(Port)			/*Check*/
-    );
-    (   
     	icmpv6_type(X, IC6),
-        isIcmpv6TypeDrop(IC6)		/*Check*/
+        isICMPV6TypeDrop(IC6)	
     );
     (   
     	icmpv6_msgCode(X,Msg),
-        isIcmpv6MsgCodeDrop(Msg)	/*Check*/
+        isICMPV6CodeDrop(Msg)	
+    );
+    ( 
+    	vlanId(X,VLAN),					
+        isVlanIDDrop(VLAN)			
+    );
+    (
+    	tcpSrc(X,TCPPortNo),
+    	isTCPSrcDrop(TCPPortNo)
     );
     (   
-    	vlanId(X,VLAN),					
-        isVLANDrop(VLAN)			/*Check*/
+    	dstSrc(X,TCPPortNo),
+    	isTCPDstRejected(TCPPortNo)
+    );
+    ( 
+    	udpSrc(X,UDPPortNo),
+   		isUDPSrcDrop(UDPPortNo) 
+    );
+    (   
+    	udpDst(X,UDPPortNo),
+   		isUDPDstDrop(UDPPortNo) 
+    );
+    (  
+    	ipv6Src(X,IPV6SrcAddr),
+   		isIPV6SrcDrop(IPV6SrcAddr) 
+    );
+    (   
+    	ipv6Dst(X,IPV6DstAddr),
+    	isIPV6DstDrop(IPV6DstAddr)
+    );
+    (   
+    	icmpType(X,Type),
+    	isICMPTypeDrop(Type)
+    );
+    (   
+    	icmpCode(X,Code),
+    	isICMPCodeDrop(Code)
     ).
 
 printAccepted(X) :-
     (   
     	src_ip(X,Src_IP),
     	isSrcIPAccepted(Src_IP)
-    ),
+    );
     (   
     	dest_ip(X, Dest_IP),
         isDstIPAccepted(Dest_IP)
-    ),
+    );
     (   
     	adapter_num(X,Adap),
         isAdapterAccepted(Adap)
-    ),
+    );
     (   
     	protocol_type(X,Protocol),
         isProtocolIDAccepted(Protocol)
-    ),
-    (   
-    	port_num(X,Port),
-        isPortNumAccepted(Port)			/*Check*/
-    ),
+    );
     (   
     	icmpv6_type(X, IC6),
-        isIcmpv6TypeAccepted(IC6)		/*Check*/
-    ),
+        isICMPV6TypeAccepted(IC6)	
+    );
     (   
     	icmpv6_msgCode(X,Msg),
-        isIcmpv6MsgCodeAccepted(Msg)	/*Check*/
-    ),
-    (   
+        isICMPV6CodeAccepted(Msg)	
+    );
+    ( 
     	vlanId(X,VLAN),					
-        isVLANAccepted(VLAN)			/*Check*/
+        isVlanIDAccepted(VLAN)			
+    );
+    (
+    	tcpSrc(X,TCPPortNo),
+    	isTCPSrcAccepted(TCPPortNo)
+    );
+    (   
+    	dstSrc(X,TCPPortNo),
+    	isTCPDstAccepted(TCPPortNo)
+    );
+    ( 
+    	udpSrc(X,UDPPortNo),
+   		isUDPSrcAccepted(UDPPortNo) 
+    );
+    (   
+    	udpDst(X,UDPPortNo),
+   		isUDPDstAccepted(UDPPortNo) 
+    );
+    (  
+    	ipv6Src(X,IPV6SrcAddr),
+   		isIPV6SrcAccepted(IPV6SrcAddr) 
+    );
+    (   
+    	ipv6Dst(X,IPV6DstAddr),
+    	isIPV6DstAccepted(IPV6DstAddr)
+    );
+    (   
+    	icmpType(X,Type),
+    	isICMPTypeAccepted(Type)
+    );
+    (   
+    	icmpCode(X,Code),
+    	isICMPCodeAccepted(Code)
     ).
-
-
-
-
-
-
-
-
