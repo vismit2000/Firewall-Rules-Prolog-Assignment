@@ -121,7 +121,10 @@ isAdapterRejected(AdapterName) :-
     /*------------Rule to see if ProtocolID is rejectable------------*/
 	isProtocolIDRejected(ProtocolId) :- 
 	    reject(X),
-	    (
+    	sub_string(X,_,_,_,'ether'),
+    	sub_string(X,_,_,_,'proto'),
+	 (   
+        (
 	      (
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
@@ -138,12 +141,19 @@ isAdapterRejected(AdapterName) :-
 	          sub_string(X,_,_,_,PresentProtocolID),
 	          PresentProtocolID = ProtocolId
 	      )
-	    ).
+	    )
+    	;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     )
+    	.
 
 /*------------Rule to see if VlanID is rejectable------------*/
 	isVlanIDRejected(VlanId) :- 
-	    reject(X),
-	    sub_string(X,0,9,_,'ether vid'),
+	    reject(X),   
+         sub_string(X,0,9,_,'ether vid'),
+      (   
 	    (   
 	    		%direct match
 	      (
@@ -172,13 +182,19 @@ isAdapterRejected(AdapterName) :-
 	          LeftNum=<VlanIdNum,	%Check if VLAn id lies within range
 	          RightNum>=VlanIdNum
 	      )
-	    ).
+	    )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+         ).
 /*------------------SRC IP--------------------*/
 	isSrcIPRejected(SrcIP) :- 
     	reject(X),
-    	atom_length(X,XLength),	%XLength stores length of X
+        atom_length(X,XLength),	%XLength stores length of X
     	sub_string(X,0,2,_,'ip'),
-    	(
+    	(   
+        (
     		%src ip syntax:- ip src addr or src addr dst addr
           (
             sub_string(X,SrcIndex,3,_,'src'),
@@ -250,7 +266,12 @@ isAdapterRejected(AdapterName) :-
                         )
                       )
            )
-        ).
+        )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+       ).
 
 
     %------DST IP
@@ -258,7 +279,8 @@ isAdapterRejected(AdapterName) :-
     	reject(X),
     	atom_length(X,XLength),
     	sub_string(X,0,2,_,'ip'),
-    	(
+     (   
+        (
     %dst ip syntax:- ip dst addr or src addr dst addr 
           (
             sub_string(X,_,3,_,'dst'),
@@ -335,7 +357,11 @@ isAdapterRejected(AdapterName) :-
                         )
                       )
            )
-        ).
+        );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 
 
@@ -412,6 +438,8 @@ isAdapterRejected(AdapterName) :-
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
+    	(
+        (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,TCPList),
@@ -435,13 +463,19 @@ isAdapterRejected(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            ));
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     		
 	isTCPDstRejected(TCPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	%Start of the list of port no is same and length depends upon whether src is present or not
     	ListStart is Start+9,
     	(   
@@ -473,13 +507,21 @@ isAdapterRejected(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            )
+        )
+       ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 /*-----------------------UDP SRC and DST reject------------------*/
 isUDPSrcRejected(UDPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
+    (   
+     (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,UDPList),
@@ -501,12 +543,20 @@ isUDPSrcRejected(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 	isUDPDstRejected(UDPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	ListStart is Start+9,
     	(   
           (
@@ -537,12 +587,20 @@ isUDPSrcRejected(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 isIPV6SrcRejected(IPV6SrcAddr) :- 
     reject(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+   (   
+    (   
     (
     /*------------ipv6 src addr or ipv6 src addr dst addr--------------*/
     (
@@ -603,6 +661,12 @@ isIPV6SrcRejected(IPV6SrcAddr) :-
           )*/
         )
     )
+    )
+    )
+   ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
     ).
     
 
@@ -610,6 +674,8 @@ isIPV6DstRejected(IPV6DstAddr) :-
     reject(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+    (   
+    (   
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
@@ -663,13 +729,21 @@ isIPV6DstRejected(IPV6DstAddr) :-
           )*/
         )
     )
-    ).
+    )
+    )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 isICMPTypeRejected(Type) :- 
     reject(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -682,7 +756,12 @@ isICMPTypeRejected(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPCodeRejected(Code) :- 
     reject(X),
@@ -690,17 +769,26 @@ isICMPCodeRejected(Code) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 /*----------------ICMPV6 type and code rejected------------------*/
 isICMPV6TypeRejected(Type) :- 
     reject(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -713,18 +801,30 @@ isICMPV6TypeRejected(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPV6CodeRejected(Code) :- 
     reject(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 /*
  * 
