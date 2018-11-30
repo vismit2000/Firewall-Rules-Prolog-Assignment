@@ -1,5 +1,3 @@
-Engine
-
 printStatus(X) :- 
     (
     	printReject(X),
@@ -35,22 +33,42 @@ printReject(X) :-
         isProtocolIDRejected(Protocol)
     );
     (   
-    	port_num(X,Port),
-        isPortNumRejected(Port)			/*Check*/
-    );
-    (   
     	icmpv6_type(X, IC6),
-        isIcmpv6TypeRejected(IC6)		/*Check*/
+        isICMPV6TypeRejected(IC6)	
     );
     (   
     	icmpv6_msgCode(X,Msg),
-        isIcmpv6MsgCodeRejected(Msg)	/*Check*/
+        isICMPV6CodeRejected(Msg)	
+    );
+    ( 
+    	vlanId(X,VLAN),					
+        isVlanIDRejected(VLAN)			
+    );
+    (
+    
     );
     (   
-    	vlanId(X,VLAN),					
-        isVLANRejected(VLAN)			/*Check*/
+    
+    );
+    ( 
+    
+    );
+    (   
+    
+    );
+    (  
+    
     ).
-
+/* 
+ * isTCPSrcRejected(TCPPortNo)
+ * isTCPDstRejected(TCPPortNo)
+ * isUDPSrcRejected(UDPPortNo)
+ * isUDPDstRejected(UDPPortNo)
+ * isIPV6SrcRejected(IPV6SrcAddr)    
+ * isIPV6DstRejected(IPV6DstAddr)
+ * isICMPTypeRejected(Type)
+ * isICMPCodeRejected(Code)
+ * */
 printDrop(X) :-
     (   
     	src_ip(X,Src_IP),
