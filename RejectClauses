@@ -44,13 +44,13 @@ packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeB
 
 /*-----------Rule Base-----------*/
 /*-----------Ethernet Clause-----------*/
-reject('ether proto 187').
+reject('ether proto any').
 reject('ether proto 127').
 reject('ether proto asd').
 reject('ether proto 0x6dd').
-reject('ether vid 2').
-reject('ether vid 20-191 proto 1111').
-reject('ether vid 5,4,1,8 proto 117').
+reject('ether vid any').
+reject('ether vid 20-191 proto any').
+reject('ether vid 5 proto 117').
 
 /*-----------Adapter Clause-----------*/
 reject('adapter C,F,K').
@@ -59,36 +59,53 @@ reject('adapter L-P').
 reject('adapter any').
 
 /*-----------Ipv4 Datagram Clause-----------*/
-reject('ip src addr 172.12.12.2 proto ftp').
+reject('ip src addr any proto ftp').
 reject('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
 reject('ip dst addr 72.12.12.2-100.21.11.2').
-reject('ip dst addr 122.12.12.2').
+reject('ip dst addr any').
 reject('ip addr 172.2.12.2,123.121.11').
 reject('ip proto tcp').
-reject('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+reject('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
 
 /*-----------Ipv6 Datagram Clause-----------*/
-reject('ipv6 src addr FF01:0:0:0:0:0:0:101 proto tcp').
-reject('ipv6 src addr 1:0:0:0:0:0:0:101').
+reject('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
+reject('ipv6 src addr any').
 reject('ipv6 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
+reject('ipv6 addr 1:0:0:0:0:0:0:200,any').
 reject('ipv6 proto ftp').
 reject('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
+reject('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
 
 /*-----------TCP and UDP Conditions-----------*/
-reject('udp dst port 4-10').
+reject('udp dst port any').
 reject('udp dst port 6').
-reject('udp dst port 4500,3456 src port 456,234,12').
+reject('udp dst port 4500,3456 src port 456,234,any').
 
 /*-----------ICMP Conditions-----------*/
 reject('icmp code 1234').
-reject('icmp code 123').
+reject('icmp code any').
 
 /*-----------ICMPV6 Conditions-----------*/
-reject('icmpv6 type tcp code 1223').
-reject('icmpv6 type tcp code 123').
+reject('icmpv6 type tcp code any').
+reject('icmpv6 type any code 123').
 
+/*	RULE BASE SYNTAX
+ * isAdapterRejected(AdapterName) 
+ * isProtocolIDRejected(ProtocolId)
+ * isVlanIDRejected(VlanId)
+ * isSrcIPRejected(SrcIP) 
+ * isDstIPRejected(DstIP)
+ * isTCPSrcRejected(TCPPortNo)
+ * isTCPDstRejected(TCPPortNo)
+ * isUDPSrcRejected(UDPPortNo)
+ * isUDPDstRejected(UDPPortNo)
+ * isIPV6SrcRejected(IPV6SrcAddr)    
+ * isIPV6DstRejected(IPV6DstAddr)
+ * isICMPTypeRejected(Type)
+ * isICMPCodeRejected(Code)
+ * isICMPV6TypeRejected(Type)
+ * isICMPV6CodeRejected(Code)
+ * */
 /*------------Rule to see if adapter is rejectable------------*/
 isAdapterRejected(AdapterName) :- 
     reject(X),	%Check for clauses in reject predicate
@@ -669,7 +686,6 @@ isIPV6SrcRejected(IPV6SrcAddr) :-
         )
     ).
     
-
 isIPV6DstRejected(IPV6DstAddr) :- 
     reject(X),
     sub_string(X,_,4,_,'ipv6'),
