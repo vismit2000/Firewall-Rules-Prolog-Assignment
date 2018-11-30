@@ -11,7 +11,7 @@ printStatus(X) :-
     (
     	not(printReject(X)),
         not(printDropped(X)),
-        printAccept(X),
+        printAccepted(X),
         write('Packet Accepted')
     ).
 
@@ -49,7 +49,7 @@ printReject(X) :-
     	isTCPSrcRejected(TCPPortNo)
     );
     (   
-    	dstSrc(X,TCPPortNo),
+    	tcpDst(X,TCPPortNo),
     	isTCPDstRejected(TCPPortNo)
     );
     ( 
@@ -110,8 +110,8 @@ printDropped(X) :-
     	isTCPSrcDropped(TCPPortNo)
     );
     (   
-    	dstSrc(X,TCPPortNo),
-    	isTCPDstRejected(TCPPortNo)
+    	tcpDst(X,TCPPortNo),
+    	isTCPDstDropped(TCPPortNo)
     );
     ( 
     	udpSrc(X,UDPPortNo),
@@ -138,237 +138,26 @@ printDropped(X) :-
     	isICMPCodeDropped(Code)
     ).
 
-printAccepted(X) :-
-    (   
-    	src_ip(X,Src_IP),
-    	isSrcIPAccepted(Src_IP)
-    );
-    (   
-    	dest_ip(X, Dest_IP),
-        isDstIPAccepted(Dest_IP)
-    );
-    (   
-    	adapter_num(X,Adap),
-        isAdapterAccepted(Adap)
-    );
-    (   
-    	protocol_type(X,Protocol),
-        isProtocolIDAccepted(Protocol)
-    );
-    (   
-    	icmpv6_type(X, IC6),
-        isICMPV6TypeAccepted(IC6)	
-    );
-    (   
-    	icmpv6_msgCode(X,Msg),
-        isICMPV6CodeAccepted(Msg)	
-    );
-    ( 
-    	vlanId(X,VLAN),					
-        isVlanIDAccepted(VLAN)			
-    );
-    (
-    	tcpSrc(X,TCPPortNo),
-    	isTCPSrcAccepted(TCPPortNo)
-    );
-    (   
-    	dstSrc(X,TCPPortNo),
-    	isTCPDstAccepted(TCPPortNo)
-    );
-    ( 
-    	udpSrc(X,UDPPortNo),
-   		isUDPSrcAccepted(UDPPortNo) 
-    );
-    (   
-    	udpDst(X,UDPPortNo),
-   		isUDPDstAccepted(UDPPortNo) 
-    );
-    (  
-    	ipv6Src(X,IPV6SrcAddr),
-   		isIPV6SrcAccepted(IPV6SrcAddr) 
-    );
-    (   
-    	ipv6Dst(X,IPV6DstAddr),
-    	isIPV6DstAccepted(IPV6DstAddr)
-    );
-    (   
-    	icmpType(X,Type),
-    	isICMPTypeAccepted(Type)
-    );
-    (   
-    	icmpCode(X,Code),
-    	isICMPCodeAccepted(Code)
-    ).
+printAccepted(_) :- true.
 
 
 %----------------------Sample Data--------------------
 
-packet('pack1',['250.77.60.198','1.140.210.224','H','TCP','114','26110','45807','39382','7545','14684','799','11278','4:29:20:122:50:96:35:35','172:219:104:241:67:60:28:68','45075','53020']).
-packet('pack2',['67.52.193.143','205.101.18.236','B','FTP','137','48876','41739','14315','52312','14297','24365','31435','95:104:84:238:46:11:231:73','229:212:12:251:214:251:242:111','53309','18255']).
-packet('pack3',['150.133.4.151','7.143.177.206','G','TCP','131','16311','42307','35378','40904','6849','37743','47740','69:91:208:56:205:63:2:83','142:69:244:200:32:240:118:150','38591','53786']).
-packet('pack4',['245.91.158.1','126.117.60.89','B','FTP','104','52428','14945','50982','42811','36279','40238','35469','10:26:99:95:218:250:163:204','108:177:73:246:122:238:116:245','59722','22070']).
-packet('pack5',['76.51.234.142','202.50.209.86','E','FTP','113','29976','57123','24296','58044','50135','50367','22374','203:129:96:156:234:210:181:93','72:111:58:181:138:184:59:135','60181','32783']).
-packet('pack6',['41.66.41.149','111.243.228.57','any','FTP','239','64190','30271','23823','5794','44475','7837','58747','20:4:158:125:118:51:245:229','5:44:63:183:163:151:95:47','8061','46115']).
-packet('pack7',['241.2.82.20','64.65.204.72','B','FTP','90','20135','11944','31481','65484','24557','20549','4891','27:108:23:16:164:171:149:153','228:186:42:220:13:249:19:25','44561','26784']).
-packet('pack8',['52.23.106.8','36.64.57.30','H','TCP','6','59541','48492','35502','27019','6535','64517','22484','197:50:6:140:128:57:201:160','164:114:185:226:245:60:154:187','37004','46757']).
-packet('pack9',['174.98.81.147','47.52.125.230','G','FTP','221','41616','61694','18121','40878','3454','2544','21566','130:122:19:203:7:231:243:35','69:208:0:249:14:45:124:76','37765','3515']).
-packet('pack10',['133.131.233.110','91.110.211.31','H','FTP','106','23565','27704','32003','52916','27938','12734','53257','118:23:171:5:26:240:145:162','159:122:160:139:171:14:77:87','17169','31236']).
-packet('pack11',['125.216.184.43','137.169.253.172','G','ICMP','213','44938','596','8456','19192','1254','46622','6604','217:237:100:69:186:141:137:115','133:214:241:97:13:119:230:65','39857','3870']).
-packet('pack12',['205.226.192.195','151.251.212.183','any','TCP','251','23662','15657','55304','31715','9940','39538','18697','154:115:237:26:89:104:196:70','52:156:161:143:225:117:103:17','16103','8197']).
-packet('pack13',['227.123.42.28','109.195.85.160','D','FTP','174','39593','26802','59788','20317','12634','14567','38560','56:202:134:58:229:8:29:61','173:28:41:131:9:217:122:193','19275','7051']).
-packet('pack14',['76.59.39.147','117.99.29.169','B','ICMP','254','60117','59639','30525','17669','57818','41181','60217','8:115:26:109:236:103:107:80','221:17:19:194:126:56:173:26','65523','47648']).
-packet('pack15',['28.39.156.109','29.102.76.72','D','TCP','136','27464','37553','40382','10909','42738','63765','31141','104:216:45:253:184:216:142:209','168:70:127:63:201:106:127:86','10125','15669']).
-packet('pack16',['77.233.59.16','70.127.203.212','H','FTP','143','64045','25974','61650','49179','63078','39732','29022','210:41:98:45:105:235:238:118','171:146:242:172:194:0:16:246','10929','37661']).
-packet('pack17',['11.124.118.67','199.228.170.33','D','FTP','139','10522','58720','39508','55547','57497','7869','756','200:28:72:249:239:9:0:103','31:1:172:5:215:103:249:109','5219','53390']).
-packet('pack18',['220.47.51.245','153.240.161.241','E','TCP','6','5402','59317','34537','63875','58175','39522','28092','27:27:110:121:67:169:36:72','139:8:126:74:184:199:129:185','7265','36729']).
-packet('pack19',['7.101.206.163','150.37.26.14','F','TCP','49','11698','35711','13907','26014','46327','22194','63310','157:13:20:153:74:205:53:168','185:131:88:94:210:48:113:92','16263','57929']).
-packet('pack20',['230.190.126.35','27.188.250.100','E','TCP','67','20274','40502','17459','63188','39836','49859','32508','94:120:239:219:142:70:3:129','69:34:250:59:29:209:102:112','63382','54220']).
+packet(pack1,['133.235.26.230','61.217.153.143',"A",'ICMP','42515','16931','7603','11908','65209','47211','44832','251:46:254:252:80:62:142:220','200:178:41:188:27:169:185:20','10385','16777']).
+packet(pack2,['249.127.170.151','83.160.90.186',"F",'FTP','47073','5455','43016','10578','28837','9425','62993','88:235:190:103:99:23:225:57','111:237:216:127:67:238:14:126','36185','47755']).
+packet(pack3,['71.138.50.123','73.233.252.159',"D",'FTP','28771','2660','33726','33121','15885','50565','63674','9:171:244:105:99:22:78:81','9:96:218:175:43:29:1:238','35735','33280']).
+packet(pack4,['120.204.246.146','65.218.11.49',"H",'FTP','1857','33764','36575','27035','29940','58107','57079','7:84:174:187:97:39:181:126','143:112:178:150:106:23:18:89','40440','10484']).
+packet(pack5,['12.154.17.183','243.26.58.75',"D","ICMP",'17273','32901','21494','63342','17537','14622','32076','151:183:234:10:241:14:184:46','169:252:131:53:195:111:133:97','22894','9305']).
 
 
 
 /*-----------Rule Base-----------*/
-/*-----------Ethernet Clause-----------*/
-accept('ether proto any').
-accept('ether proto 127').
-accept('ether proto asd').
-accept('ether proto 0x6dd').
-accept('ether vid any').
-accept('ether vid 20-191 proto any').
-accept('ether vid 5 proto 117').
-
-/*-----------Adapter Clause-----------*/
-accept('adapter C,F,K').
-accept('adapter H').
-accept('adapter L-P').
-accept('adapter any').
-
-/*-----------Ipv4 Datagram Clause-----------*/
-accept('ip src addr any proto ftp').
-accept('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
-accept('ip dst addr 72.12.12.2-100.21.11.2').
-accept('ip dst addr any').
-accept('ip addr 172.2.12.2,123.121.11').
-accept('ip proto tcp').
-accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
-
-/*-----------Ipv6 Datagram Clause-----------*/
-accept('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
-accept('ipv6 src addr any').
-accept('ipv6 dst addr 12AB:0:0:CD30::/60').
-accept('ipv6 addr 1:0:0:0:0:0:0:200,any').
-accept('ipv6 proto ftp').
-accept('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
-
-/*-----------TCP and UDP Conditions-----------*/
-accept('udp dst port any').
-accept('udp dst port 6').
-accept('udp dst port 4500,3456 src port 456,234,any').
-
-/*-----------ICMP Conditions-----------*/
-accept('icmp code 1234').
-accept('icmp code any').
-
-/*-----------ICMPV6 Conditions-----------*/
-accept('icmpv6 type tcp code any').
-accept('icmpv6 type any code 123').
-/*-----------Rule Base-----------*/
-/*-----------Ethernet Clause-----------*/
-reject('ether proto any').
-reject('ether proto 127').
-reject('ether proto asd').
-reject('ether proto 0x6dd').
-reject('ether vid any').
-reject('ether vid 20-191 proto any').
-reject('ether vid 5 proto 117').
-
-/*-----------Adapter Clause-----------*/
-reject('adapter C,F,K').
-reject('adapter A').
-reject('adapter L-P').
-reject('adapter any').
-
-/*-----------Ipv4 Datagram Clause-----------*/
-reject('ip src addr any proto ftp').
-reject('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
-reject('ip dst addr 72.12.12.2-100.21.11.2').
-reject('ip dst addr any').
-reject('ip addr 172.2.12.2,123.121.11').
-reject('ip proto tcp').
-reject('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
-
-/*-----------Ipv6 Datagram Clause-----------*/
-reject('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
-reject('ipv6 src addr any').
-reject('ipv6 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 addr 1:0:0:0:0:0:0:200,any').
-reject('ipv6 proto ftp').
-reject('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
-
-/*-----------TCP and UDP Conditions-----------*/
-reject('udp dst port any').
-reject('udp dst port 6').
-reject('udp dst port 4500,3456 src port 456,234,any').
-
-/*-----------ICMP Conditions-----------*/
-reject('icmp code 1234').
-reject('icmp code any').
-
-/*-----------ICMPV6 Conditions-----------*/
-reject('icmpv6 type tcp code any').
-reject('icmpv6 type any code 123').
-/*-----------Rule Base-----------*/
-/*-----------Ethernet Clause-----------*/
-drop('ether proto any').
-drop('ether proto 127').
-drop('ether proto asd').
-drop('ether proto 0x6dd').
-drop('ether vid any').
-drop('ether vid 20-191 proto any').
-drop('ether vid 5 proto 117').
-
-/*-----------Adapter Clause-----------*/
-drop('adapter C,F,K').
-drop('adapter A').
-drop('adapter L-P').
-drop('adapter any').
-
-/*-----------Ipv4 Datagram Clause-----------*/
-drop('ip src addr any proto ftp').
-drop('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
-drop('ip dst addr 72.12.12.2-100.21.11.2').
-drop('ip dst addr any').
-drop('ip addr 172.2.12.2,123.121.11').
-drop('ip proto tcp').
-drop('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
-
-/*-----------Ipv6 Datagram Clause-----------*/
-drop('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
-drop('ipv6 src addr any').
-drop('ipv6 dst addr 12AB:0:0:CD30::/60').
-drop('ipv6 addr 1:0:0:0:0:0:0:200,any').
-drop('ipv6 proto ftp').
-drop('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-drop('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
-
-/*-----------TCP and UDP Conditions-----------*/
-drop('udp dst port any').
-drop('udp dst port 6').
-drop('udp dst port 4500,3456 src port 456,234,any').
-
-/*-----------ICMP Conditions-----------*/
-drop('icmp code 1234').
-drop('icmp code any').
-
-/*-----------ICMPV6 Conditions-----------*/
-drop('icmpv6 type tcp code any').
-drop('icmpv6 type any code 123').
-
+accept('ether vid 12').
+reject('tcp dst port 17537').
+drop('ether vid 21494').
 /*
  * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
  */
-
 
 src_ip(Packet_Name,Src_IP) :- 
     packet(Packet_Name,List),
@@ -386,55 +175,49 @@ protocol_type(Packet_Name,Protocol_Type) :-
     packet(Packet_Name,List),
     [_|[_|[_|[Protocol_Type|_]]]]=List.
 
-port_num(Packet_Name,Port_Num) :- 
-    packet(Packet_Name,List),
-    [_|[_|[_|[_|[Port_Num|_]]]]]=List.     
-
-
 icmpv6_type(Packet_Name,Icmpv6_Type) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[Icmpv6_Type|_]]]]]]=List.
+    [_|[_|[_|[_|[Icmpv6_Type|_]]]]]=List.
 
 icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :- 
     packet(Packet_Name,List),
-	[_|[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]]=List.
+	[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]=List.
 
 vlanId(Packet_Name,VlanId) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]=List.
 
 tcpSrc(Packet_Name,TCPSrc) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]=List.
     
 tcpDst(Packet_Name,TCPDst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]=List.
 
 udpSrc(Packet_Name,UDPSrc) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]=List.
     
 udpDst(Packet_Name,UDPDst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]=List.
     
 ipv6Src(Packet_Name,IPV6Src) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]]=List.      
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]=List.      
     
 ipv6Dst(Packet_Name,IPV6Dst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]=List.
 
 icmpType(Packet_Name,ICMPType) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]=List.
 
 icmpCode(Packet_Name,ICMPCode) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]]=List.
-
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]=List.
 
 /*	RULE BASE SYNTAX
  * isAdapterAccepted(AdapterName) 
@@ -516,15 +299,24 @@ isAdapterAccepted(AdapterName) :-
 /*------------Rule to see if VlanID is acceptable------------*/
 	isVlanIDAccepted(VlanId) :- 
 	    accept(X),   
-         sub_string(X,0,9,_,'ether vid'),
+    	atom_length(X,XLength),
+         sub_string(X,StartTemp,_,_,'ether vid'),
       (   
 	    (   
 	    		%direct match
 	      (
-	          sub_string(X,Start,_,_,PresentVlanID),
-	          sub_string(X,ProtoIndex,5,_,'proto'),
-	          Start<ProtoIndex,
-	          PresentVlanID = VlanId
+	          Start is StartTemp + 10,
+              (
+              (
+              sub_string(X,ProtoIndex,_,_,'proto'),
+                  Length is ProtoIndex-Start-1
+              );
+              (
+              	Length is XLength - Start
+              )
+              ),
+              sub_string(X,Start,Length,_,VlanList),
+              sub_string(VlanList,_,_,_,VlanId)
 	      )
 	      ;
 	      (
@@ -1279,15 +1071,24 @@ isAdapterRejected(AdapterName) :-
 /*------------Rule to see if VlanID is rejectable------------*/
 	isVlanIDRejected(VlanId) :- 
 	    reject(X),   
-         sub_string(X,0,9,_,'ether vid'),
+    	atom_length(X,XLength),
+         sub_string(X,StartTemp,_,_,'ether vid'),
       (   
 	    (   
-	    		%direct match
+	    			%direct match
 	      (
-	          sub_string(X,Start,_,_,PresentVlanID),
-	          sub_string(X,ProtoIndex,5,_,'proto'),
-	          Start<ProtoIndex,
-	          PresentVlanID = VlanId
+	          Start is StartTemp + 10,
+              (
+              (
+              sub_string(X,ProtoIndex,_,_,'proto'),
+                  Length is ProtoIndex-Start-1
+              );
+              (
+              	Length is XLength - Start
+              )
+              ),
+              sub_string(X,Start,Length,_,VlanList),
+              sub_string(VlanList,_,_,_,VlanId)
 	      )
 	      ;
 	      (
@@ -1967,15 +1768,24 @@ isAdapterDropped(AdapterName) :-
 /*------------Rule to see if VlanID is dropable------------*/
 	isVlanIDDropped(VlanId) :- 
 	    drop(X),   
-         sub_string(X,0,9,_,'ether vid'),
+    	atom_length(X,XLength),
+         sub_string(X,StartTemp,_,_,'ether vid'),
       (   
 	    (   
-	    		%direct match
+	    				%direct match
 	      (
-	          sub_string(X,Start,_,_,PresentVlanID),
-	          sub_string(X,ProtoIndex,5,_,'proto'),
-	          Start<ProtoIndex,
-	          PresentVlanID = VlanId
+	          Start is StartTemp + 10,
+              (
+              (
+              sub_string(X,ProtoIndex,_,_,'proto'),
+                  Length is ProtoIndex-Start-1
+              );
+              (
+              	Length is XLength - Start
+              )
+              ),
+              sub_string(X,Start,Length,_,VlanList),
+              sub_string(VlanList,_,_,_,VlanId)
 	      )
 	      ;
 	      (
@@ -2570,6 +2380,7 @@ isICMPV6CodeDropped(Code) :-
         	sub_string(X,_,_,_,'any')
         )
      ).
+
 
 
 
