@@ -59,7 +59,7 @@ reject('adapter L-P').
 reject('adapter any').
 
 /*-----------Ipv4 Datagram Clause-----------*/
-reject('ip dst addr 172.12.12.2').
+reject('ip src addr 172.12.12.2 proto ftp').
 reject('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
 reject('ip dst addr 72.12.12.2-100.21.11.2').
 reject('ip dst addr 122.12.12.2').
@@ -68,7 +68,7 @@ reject('ip proto tcp').
 reject('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
 
 /*-----------Ipv6 Datagram Clause-----------*/
-reject('ipv6 src addr FF01:0:0:0:0:0:0:101').
+reject('ipv6 src addr FF01:0:0:0:0:0:0:101 proto tcp').
 reject('ipv6 src addr 1:0:0:0:0:0:0:101').
 reject('ipv6 dst addr 12AB:0:0:CD30::/60').
 reject('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
@@ -203,10 +203,20 @@ isAdapterRejected(AdapterName) :-
 
                   );
                  %only src addr present
-                 (
+                 (	
                      not(sub_string(X,_,3,_,'dst')),
                      sub_string(X,_,3,_,'src'),
-                     StrLen is XLength - Start1,
+                     (
+                     (
+                       StrLen is XLength - Start1
+                     )
+                     ;
+                     (  
+                      not(sub_string(X,_,3,_,'dst')),
+                      sub_string(X,ProtoIndex,_,_,'proto'),
+                      StrLen is ProtoIndex - Start1 -1
+                     )
+                     ),
                      sub_string(X,Start1,StrLen,_,SrcIPList),
                      (   
                       	(
@@ -548,7 +558,15 @@ isIPV6SrcRejected(IPV6SrcAddr) :-
       	(   
         	/*-------------ipv6 src addr only----------------*/
         	not(sub_string(X,_,3,_,'dst')),
+            not(sub_string(X,_,5,_,'proto')),
             Length is XLength - Start
+        )
+      	;
+      	(   
+        	/*-------------ipv6 src addr and proto----------------*/
+        	not(sub_string(X,_,3,_,'dst')),
+            sub_string(X,ProtoIndex,_,_,'proto'),
+            Length is ProtoIndex - Start -1
         )
       ),
       sub_string(X,Start,Length,_,IPSrcList),
