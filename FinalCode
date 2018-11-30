@@ -22,7 +22,7 @@ protocol_type(Packet_Name,Protocol_Type) :-
 
 port_num(Packet_Name,Port_Num) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[Port_Num|_]]]]]=List.
+    [_|[_|[_|[_|[Port_Num|_]]]]]=List.     
 
 
 icmpv6_type(Packet_Name,Icmpv6_Type) :- 
@@ -37,6 +37,38 @@ vlanId(Packet_Name,VlanId) :-
     packet(Packet_Name,List),
     [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
 
+tcpSrc(Packet_Name,TCPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]]=List.
+    
+tcpDst(Packet_Name,TCPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]]=List.
+
+udpSrc(Packet_Name,UDPSrc) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]]=List.
+    
+udpDst(Packet_Name,UDPDst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]]=List.
+    
+ipv6Src(Packet_Name,IPV6Src) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]]=List.      
+    
+ipv6Dst(Packet_Name,IPV6Dst) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]]=List.
+
+icmpType(Packet_Name,ICMPType) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]]=List.
+
+icmpCode(Packet_Name,ICMPCode) :- 
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]]=List.
+
 
 /*----------------FACTS-------------*/
 
@@ -44,13 +76,13 @@ packet(pack1,['50.223.138.93','78.87.13.100','55332','FTP','103','icmpProtoTypeB
 
 /*-----------Rule Base-----------*/
 /*-----------Ethernet Clause-----------*/
-accept('ether proto 187').
+accept('ether proto any').
 accept('ether proto 127').
 accept('ether proto asd').
 accept('ether proto 0x6dd').
-accept('ether vid 2').
-accept('ether vid 20-191 proto 1111').
-accept('ether vid 5,4,1,8 proto 117').
+accept('ether vid any').
+accept('ether vid 20-191 proto any').
+accept('ether vid 5 proto 117').
 
 /*-----------Adapter Clause-----------*/
 accept('adapter C,F,K').
@@ -59,36 +91,53 @@ accept('adapter L-P').
 accept('adapter any').
 
 /*-----------Ipv4 Datagram Clause-----------*/
-accept('ip dst addr 172.12.12.2').
+accept('ip src addr any proto ftp').
 accept('ip dst addr 190.11.12.2,217.21.11.2,1.2.3.4').
 accept('ip dst addr 72.12.12.2-100.21.11.2').
-accept('ip dst addr 122.12.12.2').
+accept('ip dst addr any').
 accept('ip addr 172.2.12.2,123.121.11').
 accept('ip proto tcp').
-accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
+accept('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto any').
 
 /*-----------Ipv6 Datagram Clause-----------*/
-accept('ipv6 src addr FF01:0:0:0:0:0:0:101').
-accept('ipv6 src addr 1:0:0:0:0:0:0:101').
+accept('ipv6 src addr FF01:0:0:0:0:0:0:101 proto any').
+accept('ipv6 src addr any').
 accept('ipv6 dst addr 12AB:0:0:CD30::/60').
-accept('ipv6 addr 1:0:0:0:0:0:0:200,1:0:0:0:0:0:012:200').
+accept('ipv6 addr 1:0:0:0:0:0:0:200,any').
 accept('ipv6 proto ftp').
 accept('ipv6 src addr 1:0:0:0:0:0:0:20,1:0:0:0:0:0:12:20,1:0:0:0:0:0:0:298 dst addr 12AB:0:0:CD30::/60').
-accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto 1234').
+accept('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3 proto any').
 
 /*-----------TCP and UDP Conditions-----------*/
-accept('udp dst port 4-10').
+accept('udp dst port any').
 accept('udp dst port 6').
-accept('udp dst port 4500,3456 src port 456,234,12').
+accept('udp dst port 4500,3456 src port 456,234,any').
 
 /*-----------ICMP Conditions-----------*/
 accept('icmp code 1234').
-accept('icmp code 123').
+accept('icmp code any').
 
 /*-----------ICMPV6 Conditions-----------*/
-accept('icmpv6 type tcp code 1223').
-accept('icmpv6 type tcp code 123').
+accept('icmpv6 type tcp code any').
+accept('icmpv6 type any code 123').
 
+/*	RULE BASE SYNTAX
+ * isAdapterAccepted(AdapterName) 
+ * isProtocolIDAccepted(ProtocolId)
+ * isVlanIDAccepted(VlanId)
+ * isSrcIPAccepted(SrcIP) 
+ * isDstIPAccepted(DstIP)
+ * isTCPSrcAccepted(TCPPortNo)
+ * isTCPDstAccepted(TCPPortNo)
+ * isUDPSrcAccepted(UDPPortNo)
+ * isUDPDstAccepted(UDPPortNo)
+ * isIPV6SrcAccepted(IPV6SrcAddr)    
+ * isIPV6DstAccepted(IPV6DstAddr)
+ * isICMPTypeAccepted(Type)
+ * isICMPCodeAccepted(Code)
+ * isICMPV6TypeAccepted(Type)
+ * isICMPV6CodeAccepted(Code)
+ * */
 /*------------Rule to see if adapter is acceptable------------*/
 isAdapterAccepted(AdapterName) :- 
     accept(X),	%Check for clauses in accept predicate
@@ -121,7 +170,10 @@ isAdapterAccepted(AdapterName) :-
     /*------------Rule to see if ProtocolID is acceptable------------*/
 	isProtocolIDAccepted(ProtocolId) :- 
 	    accept(X),
-	    (
+    	sub_string(X,_,_,_,'ether'),
+    	sub_string(X,_,_,_,'proto'),
+	 (   
+        (
 	      (
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
@@ -138,12 +190,19 @@ isAdapterAccepted(AdapterName) :-
 	          sub_string(X,_,_,_,PresentProtocolID),
 	          PresentProtocolID = ProtocolId
 	      )
-	    ).
+	    )
+    	;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     )
+    	.
 
 /*------------Rule to see if VlanID is acceptable------------*/
 	isVlanIDAccepted(VlanId) :- 
-	    accept(X),
-	    sub_string(X,0,9,_,'ether vid'),
+	    accept(X),   
+         sub_string(X,0,9,_,'ether vid'),
+      (   
 	    (   
 	    		%direct match
 	      (
@@ -172,13 +231,19 @@ isAdapterAccepted(AdapterName) :-
 	          LeftNum=<VlanIdNum,	%Check if VLAn id lies within range
 	          RightNum>=VlanIdNum
 	      )
-	    ).
+	    )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+         ).
 /*------------------SRC IP--------------------*/
 	isSrcIPAccepted(SrcIP) :- 
     	accept(X),
-    	atom_length(X,XLength),	%XLength stores length of X
+        atom_length(X,XLength),	%XLength stores length of X
     	sub_string(X,0,2,_,'ip'),
-    	(
+    	(   
+        (
     		%src ip syntax:- ip src addr or src addr dst addr
           (
             sub_string(X,SrcIndex,3,_,'src'),
@@ -203,10 +268,20 @@ isAdapterAccepted(AdapterName) :-
 
                   );
                  %only src addr present
-                 (
+                 (	
                      not(sub_string(X,_,3,_,'dst')),
                      sub_string(X,_,3,_,'src'),
-                     StrLen is XLength - Start1,
+                     (
+                     (
+                       StrLen is XLength - Start1
+                     )
+                     ;
+                     (  
+                      not(sub_string(X,_,3,_,'dst')),
+                      sub_string(X,ProtoIndex,_,_,'proto'),
+                      StrLen is ProtoIndex - Start1 -1
+                     )
+                     ),
                      sub_string(X,Start1,StrLen,_,SrcIPList),
                      (   
                       	(
@@ -240,7 +315,12 @@ isAdapterAccepted(AdapterName) :-
                         )
                       )
            )
-        ).
+        )
+        ;
+            (   
+                sub_string(X,_,_,_,'any')
+            )
+       ).
 
 
     %------DST IP
@@ -248,7 +328,8 @@ isAdapterAccepted(AdapterName) :-
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,0,2,_,'ip'),
-    	(
+     (   
+        (
     %dst ip syntax:- ip dst addr or src addr dst addr 
           (
             sub_string(X,_,3,_,'dst'),
@@ -325,7 +406,11 @@ isAdapterAccepted(AdapterName) :-
                         )
                       )
            )
-        ).
+        );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 
 
@@ -402,6 +487,8 @@ isAdapterAccepted(AdapterName) :-
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
+    	(
+        (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,TCPList),
@@ -425,13 +512,19 @@ isAdapterAccepted(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            ));
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     		
 	isTCPDstAccepted(TCPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	%Start of the list of port no is same and length depends upon whether src is present or not
     	ListStart is Start+9,
     	(   
@@ -463,13 +556,21 @@ isAdapterAccepted(AdapterName) :-
                 LeftNum=<TCPPortNum,
                 RightNum>=TCPPortNum
               )
-            ).
+            )
+        )
+       ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 /*-----------------------UDP SRC and DST accept------------------*/
 isUDPSrcAccepted(UDPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
+    (   
+     (   
     	ListStart is Start+9,
     	Length is XLength - ListStart,
     	sub_string(X,ListStart,Length,_,UDPList),
@@ -491,12 +592,20 @@ isUDPSrcAccepted(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 	isUDPDstAccepted(UDPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
+    (   
+     (   
     	ListStart is Start+9,
     	(   
           (
@@ -527,12 +636,20 @@ isUDPSrcAccepted(UDPPortNo) :-
                 LeftNum=<UDPPortNum,
                 RightNum>=UDPPortNum
               )
-            ).
+            )
+     )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 isIPV6SrcAccepted(IPV6SrcAddr) :- 
     accept(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+   (   
+    (   
     (
     /*------------ipv6 src addr or ipv6 src addr dst addr--------------*/
     (
@@ -548,7 +665,15 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
       	(   
         	/*-------------ipv6 src addr only----------------*/
         	not(sub_string(X,_,3,_,'dst')),
+            not(sub_string(X,_,5,_,'proto')),
             Length is XLength - Start
+        )
+      	;
+      	(   
+        	/*-------------ipv6 src addr and proto----------------*/
+        	not(sub_string(X,_,3,_,'dst')),
+            sub_string(X,ProtoIndex,_,_,'proto'),
+            Length is ProtoIndex - Start -1
         )
       ),
       sub_string(X,Start,Length,_,IPSrcList),
@@ -585,13 +710,20 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
           )*/
         )
     )
+    )
+    )
+   ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
     ).
     
-
 isIPV6DstAccepted(IPV6DstAddr) :- 
     accept(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+    (   
+    (   
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
@@ -645,13 +777,21 @@ isIPV6DstAccepted(IPV6DstAddr) :-
           )*/
         )
     )
-    ).
+    )
+    )
+    ;
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 isICMPTypeAccepted(Type) :- 
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -664,7 +804,12 @@ isICMPTypeAccepted(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPCodeAccepted(Code) :- 
     accept(X),
@@ -672,17 +817,26 @@ isICMPCodeAccepted(Code) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 /*----------------ICMPV6 type and code accepted------------------*/
 isICMPV6TypeAccepted(Type) :- 
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
     	(
@@ -695,18 +849,30 @@ isICMPV6TypeAccepted(Type) :-
             Length is XLength - Start
         )
     ),
-    sub_string(X,Start,Length,_,Type).
+    sub_string(X,Start,Length,_,Type)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
     
 isICMPV6CodeAccepted(Code) :- 
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
+    (   
+    (   
     Start is StartTemp + 5,
     (
             Length is XLength - Start
     ),
-    sub_string(X,Start,Length,_,Code).
+    sub_string(X,Start,Length,_,Code)
+    );
+    	(   
+        	sub_string(X,_,_,_,'any')
+        )
+     ).
 
 /*
  * 
