@@ -49,7 +49,7 @@ printReject(X) :-
     	isTCPSrcRejected(TCPPortNo)
     );
     (   
-    	tcpDst(X,TCPPortNo),
+    	tcpSrc(X,TCPPortNo),
     	isTCPDstRejected(TCPPortNo)
     );
     ( 
@@ -110,8 +110,8 @@ printDropped(X) :-
     	isTCPSrcDropped(TCPPortNo)
     );
     (   
-    	tcpDst(X,TCPPortNo),
-    	isTCPDstDropped(TCPPortNo)
+    	tcpSrc(X,TCPPortNo),
+    	isTCPDstRejected(TCPPortNo)
     );
     ( 
     	udpSrc(X,UDPPortNo),
@@ -148,13 +148,13 @@ packet(pack2,['249.127.170.151','83.160.90.186',"F",'FTP','47073','5455','43016'
 packet(pack3,['71.138.50.123','73.233.252.159',"D",'FTP','28771','2660','33726','33121','15885','50565','63674','9:171:244:105:99:22:78:81','9:96:218:175:43:29:1:238','35735','33280']).
 packet(pack4,['120.204.246.146','65.218.11.49',"H",'FTP','1857','33764','36575','27035','29940','58107','57079','7:84:174:187:97:39:181:126','143:112:178:150:106:23:18:89','40440','10484']).
 packet(pack5,['12.154.17.183','243.26.58.75',"D","ICMP",'17273','32901','21494','63342','17537','14622','32076','151:183:234:10:241:14:184:46','169:252:131:53:195:111:133:97','22894','9305']).
-packet(pack6,['12.34.56.78','98.65.43.32','G',"FTP",,,'456','23','65',,,,,'5','6']).
+
 
 
 /*-----------Rule Base-----------*/
-accept('ether vid 12').
-reject('ipv6 dst addr 169:252:131:53:195:111:133:97').
-drop('ipv6 dst addr 143:112:178:150:106:23:18:89').
+accept('ip src 172.24.6.31').
+reject('adapter P').
+drop('adapter H').
 /*
  * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
  */
@@ -299,24 +299,15 @@ isAdapterAccepted(AdapterName) :-
 /*------------Rule to see if VlanID is acceptable------------*/
 	isVlanIDAccepted(VlanId) :- 
 	    accept(X),   
-    	atom_length(X,XLength),
-         sub_string(X,StartTemp,_,_,'ether vid'),
+         sub_string(X,0,9,_,'ether vid'),
       (   
 	    (   
 	    		%direct match
 	      (
-	          Start is StartTemp + 10,
-              (
-              (
-              sub_string(X,ProtoIndex,_,_,'proto'),
-                  Length is ProtoIndex-Start-1
-              );
-              (
-              	Length is XLength - Start
-              )
-              ),
-              sub_string(X,Start,Length,_,VlanList),
-              sub_string(VlanList,_,_,_,VlanId)
+	          sub_string(X,Start,_,_,PresentVlanID),
+	          sub_string(X,ProtoIndex,5,_,'proto'),
+	          Start<ProtoIndex,
+	          PresentVlanID = VlanId
 	      )
 	      ;
 	      (
@@ -834,6 +825,7 @@ isIPV6DstAccepted(IPV6DstAddr) :-
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
+      sub_string(X,_,3,_,'src'),
       sub_string(X,DstStart,3,_,'dst'),
       Start is DstStart + 9,
       (
@@ -841,13 +833,12 @@ isIPV6DstAccepted(IPV6DstAddr) :-
         	/*-------------ipv6 src addr only, length remains same----------------*/
             (
             	not(sub_string(X,_,_,_,'proto')),
-                not(sub_string(X,_,_,_,'src')),
             	Length is XLength - Start
             )
       		;
       		(   
             	sub_string(X,ProtoIndex,_,_,'proto'),
-                Length is ProtoIndex-DstStart-1
+                Length is ProtoIndex-DstStart+1
             )
       ),
       sub_string(X,Start,Length,_,IPDstList),
@@ -856,6 +847,11 @@ isIPV6DstAccepted(IPV6DstAddr) :-
           (   
           	sub_string(IPDstList,_,_,_,IPV6DstAddr)
           )
+          /*;*/
+        /*---------Range of Values------------*/
+          /*( 
+          
+          )*/
         )
     )
      ;
@@ -1066,24 +1062,15 @@ isAdapterRejected(AdapterName) :-
 /*------------Rule to see if VlanID is rejectable------------*/
 	isVlanIDRejected(VlanId) :- 
 	    reject(X),   
-    	atom_length(X,XLength),
-         sub_string(X,StartTemp,_,_,'ether vid'),
+         sub_string(X,0,9,_,'ether vid'),
       (   
 	    (   
-	    			%direct match
+	    		%direct match
 	      (
-	          Start is StartTemp + 10,
-              (
-              (
-              sub_string(X,ProtoIndex,_,_,'proto'),
-                  Length is ProtoIndex-Start-1
-              );
-              (
-              	Length is XLength - Start
-              )
-              ),
-              sub_string(X,Start,Length,_,VlanList),
-              sub_string(VlanList,_,_,_,VlanId)
+	          sub_string(X,Start,_,_,PresentVlanID),
+	          sub_string(X,ProtoIndex,5,_,'proto'),
+	          Start<ProtoIndex,
+	          PresentVlanID = VlanId
 	      )
 	      ;
 	      (
@@ -1537,7 +1524,7 @@ isIPV6DstRejected(IPV6DstAddr) :-
       Start is DstStart + 9,
       (
       	/*-----------ipv6 src addr dst addr or---------------*/
-        	/*-------------ipv6 src addr only, length remains same----------------*/
+        	/*-------------ipv6 dst addr only, length remains same----------------*/
             (
             	not(sub_string(X,_,_,_,'proto')),
             	Length is XLength - Start
@@ -1545,7 +1532,6 @@ isIPV6DstRejected(IPV6DstAddr) :-
       		;
       		(   
             	sub_string(X,ProtoIndex,_,_,'proto'),
-                not(sub_string(X,_,_,_,'src')),
                 Length is ProtoIndex-DstStart-1
             )
       ),
@@ -1763,24 +1749,15 @@ isAdapterDropped(AdapterName) :-
 /*------------Rule to see if VlanID is dropable------------*/
 	isVlanIDDropped(VlanId) :- 
 	    drop(X),   
-    	atom_length(X,XLength),
-         sub_string(X,StartTemp,_,_,'ether vid'),
+         sub_string(X,_,_,_,'ether vid'),
       (   
 	    (   
-	    				%direct match
+	    		%direct match
 	      (
-	          Start is StartTemp + 10,
-              (
-              (
-              sub_string(X,ProtoIndex,_,_,'proto'),
-                  Length is ProtoIndex-Start-1
-              );
-              (
-              	Length is XLength - Start
-              )
-              ),
-              sub_string(X,Start,Length,_,VlanList),
-              sub_string(VlanList,_,_,_,VlanId)
+	          sub_string(X,Start,_,_,PresentVlanID),
+	          sub_string(X,ProtoIndex,5,_,'proto'),
+	          Start<ProtoIndex,
+	          PresentVlanID = VlanId
 	      )
 	      ;
 	      (
@@ -2229,6 +2206,7 @@ isIPV6DstDropped(IPV6DstAddr) :-
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
+      sub_string(X,_,3,_,'src'),
       sub_string(X,DstStart,3,_,'dst'),
       Start is DstStart + 9,
       (
@@ -2241,7 +2219,7 @@ isIPV6DstDropped(IPV6DstAddr) :-
       		;
       		(   
             	sub_string(X,ProtoIndex,_,_,'proto'),
-                Length is ProtoIndex-DstStart-1
+                Length is ProtoIndex-DstStart+1
             )
       ),
       sub_string(X,Start,Length,_,IPDstList),
