@@ -1,6 +1,6 @@
 
 /*
- * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
+ * List is ['Src_ip','Dst_ip','Adapter_num','Protocol_type','Port_num','Icmpv6_type','Icmpv6_Msgcode','Vlan_Id','TCPSrc','TCPDst','UDPSrc','UDPDst','IPV6Src','IPV6Dst','ICMPType','ICMPCode']
  */
 
 
@@ -8,9 +8,9 @@ src_ip(Packet_Name,Src_IP) :-
     packet(Packet_Name,List),
     [Src_IP|_]=List.
 
-dest_ip(Packet_Name,Dest_IP) :- 
+dest_ip(Packet_Name,Dst_IP) :- 
     packet(Packet_Name,List),
-    [_|[Dest_IP|_]]=List.
+    [_|[Dst_IP|_]]=List.
 
 adapter_num(Packet_Name,Adapter_Num) :- 
     packet(Packet_Name,List),
