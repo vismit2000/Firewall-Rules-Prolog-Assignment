@@ -5,12 +5,12 @@ printStatus(X) :-
     );
     (   
     	not(printReject(X)),
-        printDrop(X),
+        printDropped(X),
         write('Packet Dropped')
     );
     (
     	not(printReject(X)),
-        not(printDrop(X)),
+        not(printDropped(X)),
         printAccept(X),
         write('Packet Accepted')
     ).
@@ -76,38 +76,38 @@ printReject(X) :-
     	icmpCode(X,Code),
     	isICMPCodeRejected(Code)
     ).
-printDrop(X) :-
+printDropped(X) :-
     (   
     	src_ip(X,Src_IP),
-    	isSrcIPDrop(Src_IP)
+    	isSrcIPDropped(Src_IP)
     );
     (   
     	dest_ip(X, Dest_IP),
-        isDstIPDrop(Dest_IP)
+        isDstIPDropped(Dest_IP)
     );
     (   
     	adapter_num(X,Adap),
-        isAdapterDrop(Adap)
+        isAdapterDropped(Adap)
     );
     (   
     	protocol_type(X,Protocol),
-        isProtocolIDDrop(Protocol)
+        isProtocolIDDropped(Protocol)
     );
     (   
     	icmpv6_type(X, IC6),
-        isICMPV6TypeDrop(IC6)	
+        isICMPV6TypeDropped(IC6)	
     );
     (   
     	icmpv6_msgCode(X,Msg),
-        isICMPV6CodeDrop(Msg)	
+        isICMPV6CodeDropped(Msg)	
     );
     ( 
     	vlanId(X,VLAN),					
-        isVlanIDDrop(VLAN)			
+        isVlanIDDropped(VLAN)			
     );
     (
     	tcpSrc(X,TCPPortNo),
-    	isTCPSrcDrop(TCPPortNo)
+    	isTCPSrcDropped(TCPPortNo)
     );
     (   
     	dstSrc(X,TCPPortNo),
@@ -115,27 +115,27 @@ printDrop(X) :-
     );
     ( 
     	udpSrc(X,UDPPortNo),
-   		isUDPSrcDrop(UDPPortNo) 
+   		isUDPSrcDropped(UDPPortNo) 
     );
     (   
     	udpDst(X,UDPPortNo),
-   		isUDPDstDrop(UDPPortNo) 
+   		isUDPDstDropped(UDPPortNo) 
     );
     (  
     	ipv6Src(X,IPV6SrcAddr),
-   		isIPV6SrcDrop(IPV6SrcAddr) 
+   		isIPV6SrcDropped(IPV6SrcAddr) 
     );
     (   
     	ipv6Dst(X,IPV6DstAddr),
-    	isIPV6DstDrop(IPV6DstAddr)
+    	isIPV6DstDropped(IPV6DstAddr)
     );
     (   
     	icmpType(X,Type),
-    	isICMPTypeDrop(Type)
+    	isICMPTypeDropped(Type)
     );
     (   
     	icmpCode(X,Code),
-    	isICMPCodeDrop(Code)
+    	isICMPCodeDropped(Code)
     ).
 
 printAccepted(X) :-
