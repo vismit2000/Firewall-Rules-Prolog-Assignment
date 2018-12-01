@@ -143,9 +143,9 @@ printAccepted(_) :- true.
 
 %----------------------Sample Data--------------------
 
-packet(pack1,['172.24.6.31','43.134.21.34',"A",'ICMP','42515','16931','7603','11908','65209','1234','6786','251:46:254:252:80:62:142:220','200:178:41:188:27:169:185:20','1231','123']).
-packet(pack2,['121.21.23.32','123.23.45.67',"A",'FTP','43234','13452','43016','13422','12345','9425','62993','12:241:124:14:14:45:65:32','123:124:4:4:12:12:2','36185','47755']).
-packet(pack3,['71.138.50.123','73.233.252.159',"D",'FTP','*','*','33726','33121','15885','*','*','*','*','45','23']).
+packet(pack1,['172.24.6.31','*',"A",'ICMP','42515','16931','7603','11908','65209','*','*','251:46:254:252:80:62:142:220','200:178:41:188:27:169:185:20','*','*']).
+packet(pack2,['*','*',"A",'FTP','*','*','43016','*','*','9425','62993','*','*','36185','47755']).
+packet(pack3,['172.12.2.1','167.97.12.2',"D",'FTP','*','*','33726','33121','15885','*','*','*','*','45','23']).
 packet(pack4,['120.204.246.146','65.218.11.49',"H",'FTP','*','*','36575','27035','29940','*','*','*','*','40440','10484']).
 packet(pack5,['111.12.121.1','*',"D","ICMP",'17273','32901','21494','*','*','14622','32076','151:183:234:10:241:14:184:46','169:252:131:53:195:111:133:97','*','*']).
 packet(pack8,['12.231.12.1','*',"A","tcp",'548','85','78','898','87','*','*','78:8:9:4:5:6:1:65','AF:8A:7:6:4:CD:89:1B','*','*']).
@@ -153,9 +153,11 @@ packet(pack8,['12.231.12.1','*',"A","tcp",'548','85','78','898','87','*','*','78
 
 /*-----------Rule Base-----------*/
 accept('ip src 172.24.6.31').
-drop('adapter any').
-reject('icmpv6 code 2378').
-reject('icmpv6 type 6765 code 8765').
+accept('adapter B').
+%drop('ip src addr any').
+drop('adapter G-H').
+reject('ip src addr 172.12.2.5 dst addr 167.97.12.2 proto ftp').
+reject('adapter A').
 
 /*
  * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
@@ -343,7 +345,7 @@ isAdapterAccepted(AdapterName) :-
 	isSrcIPAccepted(SrcIP) :- 
     	accept(X),
         atom_length(X,XLength),	%XLength stores length of X
-    	sub_string(X,0,2,_,'ip'),
+    	sub_string(X,_,_,_,'ip'),
     	not(sub_string(SrcIP,_,_,_,"*")),
     	(   
         (
@@ -1132,8 +1134,8 @@ isAdapterRejected(AdapterName) :-
                 (   
                  %src and dst addr(' ' signifies space before dst)
                   (
-                    sub_string(X,Start2,1,_,' '),
-                    Start2 >= Start1,
+                    sub_string(X,Start2,1,_," "),
+                    Start2 > Start1,
                     Length is Start2-Start1,
                     sub_string(X,Start1,Length,_,SrcIPList),
                       (   
