@@ -143,9 +143,8 @@ printAccepted(_) :- true.
 
 %----------------------Sample Data--------------------
 
-packet(pack1,['172.24.6.31','*',"A",'ICMP','42515','16931','7603','11908','65209','*','*','251:46:254:252:80:62:142:220','200:178:41:188:27:169:185:20','*','*']).
-
-packet(pack2,['249.127.170.151','83.160.90.186',"F",'FTP','*','*','43016','*','*','9425','62993','*','*','36185','47755']).
+packet(pack1,['172.24.6.31','43.134.21.34',"A",'ICMP','42515','16931','7603','11908','65209','1234','6786','251:46:254:252:80:62:142:220','200:178:41:188:27:169:185:20','1231','123']).
+packet(pack2,['121.21.23.32','123.23.45.67',"A",'FTP','43234','13452','43016','13422','12345','9425','62993','12:241:124:14:14:45:65:32','123:124:4:4:12:12:2','36185','47755']).
 packet(pack3,['71.138.50.123','73.233.252.159',"D",'FTP','*','*','33726','33121','15885','*','*','*','*','45','23']).
 packet(pack4,['120.204.246.146','65.218.11.49',"H",'FTP','*','*','36575','27035','29940','*','*','*','*','40440','10484']).
 packet(pack5,['111.12.121.1','*',"D","ICMP",'17273','32901','21494','*','*','14622','32076','151:183:234:10:241:14:184:46','169:252:131:53:195:111:133:97','*','*']).
@@ -154,44 +153,7 @@ packet(pack8,['12.231.12.1','*',"A","tcp",'548','85','78','898','87','*','*','78
 
 /*-----------Rule Base-----------*/
 accept('ip src 172.24.6.31').
-accept('adapter B').
-drop('ip src addr any').
-drop('adapter D-H').
-drop('ip src 172.4.5.6').
-drop('ether proto 456').
-drop('adapter H').
-drop('adapter B-C').
 drop('adapter any').
-drop('ether vid 5-19').
-drop('ether proto 0x6dd').
-drop('tcp dst port 6').
-drop('tcp dst port 4500 src port 456').
-drop('adapter A').
-drop('adapter D,E,F').
-drop('ether vid 2').
-drop('ether proto 187').
-drop('ether proto 127').
-drop('ether proto asd').
-drop('ether vlan 5 proto 187').
-drop('ip src addr 172.12.12.2').
-drop('ip dst addr 122.12.12.2').
-drop('tcp src port 4').
-drop('ip addr 172.2.12.2').
-drop('ip proto tcp').
-reject('ip src addr 172.12.2.0 dst addr 167.97.12.2 proto ftp').
-reject('adapter A').
-reject('ipv6 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 addr 1:0:0:0:0:0:0:200').
-reject('ipv6 src addr 1:0:0:0:0:0:0:20 dst addr 12AB:0:0:CD30::/60').
-reject('ipv6 src addr 1:2:3:4:5:6:7:8 dst addr 1:2:3:4:57:1:200:3').
-reject('ip src addr 172.24.16.31 dst addr 172.36.24.11 proto udp').
-reject('ipv6 src addr FF01:0:0:0:0:0:0:101').
-reject('udp src port 5469').
-reject('udp dst port 789 src port 789').
-reject('icmp type 136').
-reject('icmp code 753').
-reject('icmp type 987 code 676').
-reject('icmpv6 type 876').
 reject('icmpv6 code 2378').
 reject('icmpv6 type 6765 code 8765').
 
