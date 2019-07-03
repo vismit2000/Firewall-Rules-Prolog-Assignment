@@ -1,0 +1,31 @@
+?- printStatus(pack1),!.	% Rule 9 applies
+Packet Rejected
+true.
+
+?- printStatus(pack2),!.	% Rule 6 applies
+Packet Dropped
+true.
+
+?- printStatus(pack3),!.	% Rule 4 applies
+Packet Dropped
+true.
+
+?- printStatus(pack4),!.	% Rule 5 applies
+Packet Dropped
+true.
+
+?- printStatus(pack5),!.	% Rule 8 applies
+Packet Rejected
+true.
+
+?- printStatus(pack6),!.	% Rule 7 applies
+Packet Rejected
+true.
+
+?- printStatus(pack7),!.	% Rule 4 applies
+Packet Dropped
+true.
+
+?- printStatus(pack8),!.	% None of the rules apply , so default behaviour (Accepted)
+Packet Accepted
+true.

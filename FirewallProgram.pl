@@ -1,184 +1,6 @@
-printStatus(X) :- 
-    (
-    	printReject(X),
-        write('Packet Rejected')
-    );
-    (   
-    	not(printReject(X)),
-        printDropped(X),
-        write('Packet Dropped')
-    );
-    (
-    	not(printReject(X)),
-        not(printDropped(X)),
-        printAccepted(X),
-        write('Packet Accepted')
-    ).
-
-printReject(X) :-
-    (   
-    	src_ip(X,Src_IP),
-    	isSrcIPRejected(Src_IP)
-    );
-    (   
-    	dest_ip(X, Dest_IP),
-        isDstIPRejected(Dest_IP)
-    );
-    (   
-    	adapter_num(X,Adap),
-        isAdapterRejected(Adap)
-    );
-    (   
-    	protocol_type(X,Protocol),
-        isProtocolIDRejected(Protocol)
-    );
-    (   
-    	icmpv6_type(X, IC6),
-        isICMPV6TypeRejected(IC6)	
-    );
-    (   
-    	icmpv6_msgCode(X,Msg),
-        isICMPV6CodeRejected(Msg)	
-    );
-    ( 
-    	vlanId(X,VLAN),					
-        isVlanIDRejected(VLAN)			
-    );
-    (
-    	tcpSrc(X,TCPPortNo),
-    	isTCPSrcRejected(TCPPortNo)
-    );
-    (   
-    	tcpSrc(X,TCPPortNo),
-    	isTCPDstRejected(TCPPortNo)
-    );
-    ( 
-    	udpSrc(X,UDPPortNo),
-   		isUDPSrcRejected(UDPPortNo) 
-    );
-    (   
-    	udpDst(X,UDPPortNo),
-   		isUDPDstRejected(UDPPortNo) 
-    );
-    (  
-    	ipv6Src(X,IPV6SrcAddr),
-   		isIPV6SrcRejected(IPV6SrcAddr) 
-    );
-    (   
-    	ipv6Dst(X,IPV6DstAddr),
-    	isIPV6DstRejected(IPV6DstAddr)
-    );
-    (   
-    	icmpType(X,Type),
-    	isICMPTypeRejected(Type)
-    );
-    (   
-    	icmpCode(X,Code),
-    	isICMPCodeRejected(Code)
-    ).
-printDropped(X) :-
-    (   
-    	src_ip(X,Src_IP),
-    	isSrcIPDropped(Src_IP)
-    );
-    (   
-    	dest_ip(X, Dest_IP),
-        isDstIPDropped(Dest_IP)
-    );
-    (   
-    	adapter_num(X,Adap),
-        isAdapterDropped(Adap)
-    );
-    (   
-    	protocol_type(X,Protocol),
-        isProtocolIDDropped(Protocol)
-    );
-    (   
-    	icmpv6_type(X, IC6),
-        isICMPV6TypeDropped(IC6)	
-    );
-    (   
-    	icmpv6_msgCode(X,Msg),
-        isICMPV6CodeDropped(Msg)	
-    );
-    ( 
-    	vlanId(X,VLAN),					
-        isVlanIDDropped(VLAN)			
-    );
-    (
-    	tcpSrc(X,TCPPortNo),
-    	isTCPSrcDropped(TCPPortNo)
-    );
-    (   
-    	tcpSrc(X,TCPPortNo),
-    	isTCPDstRejected(TCPPortNo)
-    );
-    ( 
-    	udpSrc(X,UDPPortNo),
-   		isUDPSrcDropped(UDPPortNo) 
-    );
-    (   
-    	udpDst(X,UDPPortNo),
-   		isUDPDstDropped(UDPPortNo) 
-    );
-    (  
-    	ipv6Src(X,IPV6SrcAddr),
-   		isIPV6SrcDropped(IPV6SrcAddr) 
-    );
-    (   
-    	ipv6Dst(X,IPV6DstAddr),
-    	isIPV6DstDropped(IPV6DstAddr)
-    );
-    (   
-    	icmpType(X,Type),
-    	isICMPTypeDropped(Type)
-    );
-    (   
-    	icmpCode(X,Code),
-    	isICMPCodeDropped(Code)
-    ).
-
-printAccepted(_) :- true.
-
-
-%----------------------Sample Data--------------------
-
-packet('pack1',['250.77.60.198','1.140.210.224','H','TCP','114','26110','45807','39382','7545','14684','799','11278','4:29:20:122:50:96:35:35','172:219:104:241:67:60:28:68','45075','53020']).
-packet('pack2',['67.52.193.143','205.101.18.236','B','FTP','137','48876','41739','14315','52312','14297','24365','31435','95:104:84:238:46:11:231:73','229:212:12:251:214:251:242:111','53309','18255']).
-packet('pack3',['150.133.4.151','7.143.177.206','G','TCP','131','16311','42307','35378','40904','6849','37743','47740','69:91:208:56:205:63:2:83','142:69:244:200:32:240:118:150','38591','53786']).
-packet('pack4',['245.91.158.1','126.117.60.89','B','FTP','104','52428','14945','50982','42811','36279','40238','35469','10:26:99:95:218:250:163:204','108:177:73:246:122:238:116:245','59722','22070']).
-packet('pack5',['76.51.234.142','202.50.209.86','E','FTP','113','29976','57123','24296','58044','50135','50367','22374','203:129:96:156:234:210:181:93','72:111:58:181:138:184:59:135','60181','32783']).
-packet('pack6',['41.66.41.149','111.243.228.57','any','FTP','239','64190','30271','23823','5794','44475','7837','58747','20:4:158:125:118:51:245:229','5:44:63:183:163:151:95:47','8061','46115']).
-packet('pack7',['241.2.82.20','64.65.204.72','B','FTP','90','20135','11944','31481','65484','24557','20549','4891','27:108:23:16:164:171:149:153','228:186:42:220:13:249:19:25','44561','26784']).
-packet('pack8',['52.23.106.8','36.64.57.30','H','TCP','6','59541','48492','35502','27019','6535','64517','22484','197:50:6:140:128:57:201:160','164:114:185:226:245:60:154:187','37004','46757']).
-packet('pack9',['174.98.81.147','47.52.125.230','G','FTP','221','41616','61694','18121','40878','3454','2544','21566','130:122:19:203:7:231:243:35','69:208:0:249:14:45:124:76','37765','3515']).
-packet('pack10',['133.131.233.110','91.110.211.31','H','FTP','106','23565','27704','32003','52916','27938','12734','53257','118:23:171:5:26:240:145:162','159:122:160:139:171:14:77:87','17169','31236']).
-packet('pack11',['125.216.184.43','137.169.253.172','G','ICMP','213','44938','596','8456','19192','1254','46622','6604','217:237:100:69:186:141:137:115','133:214:241:97:13:119:230:65','39857','3870']).
-packet('pack12',['205.226.192.195','151.251.212.183','any','TCP','251','23662','15657','55304','31715','9940','39538','18697','154:115:237:26:89:104:196:70','52:156:161:143:225:117:103:17','16103','8197']).
-packet('pack13',['227.123.42.28','109.195.85.160','D','FTP','174','39593','26802','59788','20317','12634','14567','38560','56:202:134:58:229:8:29:61','173:28:41:131:9:217:122:193','19275','7051']).
-packet('pack14',['76.59.39.147','117.99.29.169','B','ICMP','254','60117','59639','30525','17669','57818','41181','60217','8:115:26:109:236:103:107:80','221:17:19:194:126:56:173:26','65523','47648']).
-packet('pack15',['28.39.156.109','29.102.76.72','D','TCP','136','27464','37553','40382','10909','42738','63765','31141','104:216:45:253:184:216:142:209','168:70:127:63:201:106:127:86','10125','15669']).
-packet('pack16',['77.233.59.16','70.127.203.212','H','FTP','143','64045','25974','61650','49179','63078','39732','29022','210:41:98:45:105:235:238:118','171:146:242:172:194:0:16:246','10929','37661']).
-packet('pack17',['11.124.118.67','199.228.170.33','D','FTP','139','10522','58720','39508','55547','57497','7869','756','200:28:72:249:239:9:0:103','31:1:172:5:215:103:249:109','5219','53390']).
-packet('pack18',['220.47.51.245','153.240.161.241','E','TCP','6','5402','59317','34537','63875','58175','39522','28092','27:27:110:121:67:169:36:72','139:8:126:74:184:199:129:185','7265','36729']).
-packet('pack19',['7.101.206.163','150.37.26.14','F','TCP','49','11698','35711','13907','26014','46327','22194','63310','157:13:20:153:74:205:53:168','185:131:88:94:210:48:113:92','16263','57929']).
-packet('pack20',['230.190.126.35','27.188.250.100','E','TCP','67','20274','40502','17459','63188','39836','49859','32508','94:120:239:219:142:70:3:129','69:34:250:59:29:209:102:112','63382','54220']).
-
-
-
-/*-----------Rule Base-----------*/
-accept('ip src 172.24.6.31').
-reject('adapter C-P').
-drop('ether vid 3-199').
-/*
- * List is ['src_ip','dest_ip','adapter_num','protocol_type','port_num','icmpv6_type','icmpv6_msg_code','VLan_ID']
- */
-
-
 src_ip(Packet_Name,Src_IP) :- 
     packet(Packet_Name,List),
     [Src_IP|_]=List.
-
 dest_ip(Packet_Name,Dest_IP) :- 
     packet(Packet_Name,List),
     [_|[Dest_IP|_]]=List.
@@ -191,55 +13,52 @@ protocol_type(Packet_Name,Protocol_Type) :-
     packet(Packet_Name,List),
     [_|[_|[_|[Protocol_Type|_]]]]=List.
 
-port_num(Packet_Name,Port_Num) :- 
-    packet(Packet_Name,List),
-    [_|[_|[_|[_|[Port_Num|_]]]]]=List.     
-
-
 icmpv6_type(Packet_Name,Icmpv6_Type) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[Icmpv6_Type|_]]]]]]=List.
+    [_|[_|[_|[_|[Icmpv6_Type|_]]]]]=List.
 
 icmpv6_msgCode(Packet_Name,Icmpv6_MsgCode) :- 
     packet(Packet_Name,List),
-	[_|[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]]=List.
+	[_|[_|[_|[_|[_|[Icmpv6_MsgCode|_]]]]]]=List.
 
 vlanId(Packet_Name,VlanId) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[VlanId|_]]]]]]]=List.
 
 tcpSrc(Packet_Name,TCPSrc) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[TCPSrc|_]]]]]]]]=List.
     
 tcpDst(Packet_Name,TCPDst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[TCPDst|_]]]]]]]]]=List.
 
 udpSrc(Packet_Name,UDPSrc) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPSrc|_]]]]]]]]]]=List.
     
 udpDst(Packet_Name,UDPDst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[UDPDst|_]]]]]]]]]]]=List.
     
 ipv6Src(Packet_Name,IPV6Src) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]]=List.      
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Src|_]]]]]]]]]]]]=List.      
     
 ipv6Dst(Packet_Name,IPV6Dst) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[IPV6Dst|_]]]]]]]]]]]]]=List.
 
 icmpType(Packet_Name,ICMPType) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]]=List.
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPType|_]]]]]]]]]]]]]]=List.
 
 icmpCode(Packet_Name,ICMPCode) :- 
     packet(Packet_Name,List),
-    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]]=List.
-
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ICMPCode|_]]]]]]]]]]]]]]]=List.
+protocolID(Packet_Name,ProtocolID) :-
+    packet(Packet_Name,List),
+    [_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[_|[ProtocolID|_]]]]]]]]]]]]]]]]=List.
 
 /*	RULE BASE SYNTAX
  * isAdapterAccepted(AdapterName) 
@@ -261,7 +80,8 @@ icmpCode(Packet_Name,ICMPCode) :-
 /*------------Rule to see if adapter is acceptable------------*/
 isAdapterAccepted(AdapterName) :- 
     accept(X),	%Check for clauses in accept predicate
-    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
+    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause
+    not(sub_string(AdapterName,_,_,_,"*")),
     (
     	%There's a direct match
 	    (
@@ -292,23 +112,23 @@ isAdapterAccepted(AdapterName) :-
 	    accept(X),
     	sub_string(X,_,_,_,'ether'),
     	sub_string(X,_,_,_,'proto'),
+    	not(sub_string(ProtocolId,_,_,_,"*")),
 	 (   
         (
 	      (
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
 	        sub_string(X,_,_,_,PresentProtocolID),
-	        PresentProtocolID = ProtocolId
+	        sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    	;
 	      % vlan id present in clause (ether vid _ proto )
 	      (   
-	          sub_string(X,Index,_,_,'proto'),
-	          %Index>=7 signifies that vid is present too
-	          Index >= 7,
+		sub_string(X,_,_,_,'proto'),
+		 sub_string(X,_,_,_,'vid'),
 	          %Direct match now
 	          sub_string(X,_,_,_,PresentProtocolID),
-	          PresentProtocolID = ProtocolId
+	          sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    )
     	;
@@ -321,6 +141,7 @@ isAdapterAccepted(AdapterName) :-
 /*------------Rule to see if VlanID is acceptable------------*/
 	isVlanIDAccepted(VlanId) :- 
 	    accept(X),   
+	    not(sub_string(VlanId,_,_,_,"*")),
          sub_string(X,0,9,_,'ether vid'),
       (   
 	    (   
@@ -361,7 +182,8 @@ isAdapterAccepted(AdapterName) :-
 	isSrcIPAccepted(SrcIP) :- 
     	accept(X),
         atom_length(X,XLength),	%XLength stores length of X
-    	sub_string(X,0,2,_,'ip'),
+    	sub_string(X,_,_,_,'ip'),
+    	not(sub_string(SrcIP,_,_,_,"*")),
     	(   
         (
     		%src ip syntax:- ip src addr or src addr dst addr
@@ -448,6 +270,7 @@ isAdapterAccepted(AdapterName) :-
     	accept(X),
     	atom_length(X,XLength),
     	sub_string(X,0,2,_,'ip'),
+    	not(sub_string(DstIP,_,_,_,"*")),
      (   
         (
     %dst ip syntax:- ip dst addr or src addr dst addr 
@@ -605,6 +428,7 @@ isAdapterAccepted(AdapterName) :-
 	isTCPSrcAccepted(TCPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
     	(
@@ -641,6 +465,7 @@ isAdapterAccepted(AdapterName) :-
 	isTCPDstAccepted(TCPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
     (   
@@ -687,6 +512,7 @@ isAdapterAccepted(AdapterName) :-
 isUDPSrcAccepted(UDPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
     (   
@@ -722,6 +548,7 @@ isUDPSrcAccepted(UDPPortNo) :-
 	isUDPDstAccepted(UDPPortNo) :- 
     	accept(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
     (   
@@ -767,6 +594,7 @@ isUDPSrcAccepted(UDPPortNo) :-
 isIPV6SrcAccepted(IPV6SrcAddr) :- 
     accept(X),
     sub_string(X,_,4,_,'ipv6'),
+    not(sub_string(IPV6SrcAddr,_,_,_,"*")),
     atom_length(X,XLength),
    (   
     (   
@@ -841,6 +669,7 @@ isIPV6SrcAccepted(IPV6SrcAddr) :-
 isIPV6DstAccepted(IPV6DstAddr) :- 
     accept(X),
     sub_string(X,_,4,_,'ipv6'),
+    not(sub_string(IPV6DstAddr,_,_,_,"*")),
     atom_length(X,XLength),
     (   
     (   
@@ -908,6 +737,7 @@ isICMPTypeAccepted(Type) :-
     accept(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
+    not(sub_string(Type,_,_,_,"*")),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
     (   
@@ -934,6 +764,7 @@ isICMPTypeAccepted(Type) :-
 isICMPCodeAccepted(Code) :- 
     accept(X),
     atom_length(X,XLength),
+    not(sub_string(Code,_,_,_,"*")),
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
@@ -953,6 +784,7 @@ isICMPCodeAccepted(Code) :-
 isICMPV6TypeAccepted(Type) :- 
     accept(X),
     atom_length(X,XLength),
+    not(sub_string(Type,_,_,_,"*")),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
     (   
@@ -979,6 +811,7 @@ isICMPV6TypeAccepted(Type) :-
 isICMPV6CodeAccepted(Code) :- 
     accept(X),
     atom_length(X,XLength),
+    not(sub_string(Code,_,_,_,"*")),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
     (   
@@ -1024,7 +857,8 @@ chPresentInStr(Ch,Str) :- sub_atom_icasechk(Str,_,Ch).
 /*------------Rule to see if adapter is rejectable------------*/
 isAdapterRejected(AdapterName) :- 
     reject(X),	%Check for clauses in reject predicate
-    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
+    sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause
+    not(sub_string(AdapterName,_,_,_,"*")),
     (
     	%There's a direct match
 	    (
@@ -1053,6 +887,7 @@ isAdapterRejected(AdapterName) :-
     /*------------Rule to see if ProtocolID is rejectable------------*/
 	isProtocolIDRejected(ProtocolId) :- 
 	    reject(X),
+	    not(sub_string(ProtocolId,_,_,_,"*")),
     	sub_string(X,_,_,_,'ether'),
     	sub_string(X,_,_,_,'proto'),
 	 (   
@@ -1061,17 +896,16 @@ isAdapterRejected(AdapterName) :-
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
 	        sub_string(X,_,_,_,PresentProtocolID),
-	        PresentProtocolID = ProtocolId
+		sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    	;
 	      % vlan id present in clause (ether vid _ proto )
 	      (   
-	          sub_string(X,Index,_,_,'proto'),
-	          %Index>=7 signifies that vid is present too
-	          Index >= 7,
+		sub_string(X,_,_,_,'proto'),
+		 sub_string(X,_,_,_,'vid'),
 	          %Direct match now
 	          sub_string(X,_,_,_,PresentProtocolID),
-	          PresentProtocolID = ProtocolId
+	          sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    )
     	;
@@ -1084,6 +918,7 @@ isAdapterRejected(AdapterName) :-
 /*------------Rule to see if VlanID is rejectable------------*/
 	isVlanIDRejected(VlanId) :- 
 	    reject(X),   
+	    not(sub_string(VlanId,_,_,_,"*")),
          sub_string(X,0,9,_,'ether vid'),
       (   
 	    (   
@@ -1123,8 +958,9 @@ isAdapterRejected(AdapterName) :-
 /*------------------SRC IP--------------------*/
 	isSrcIPRejected(SrcIP) :- 
     	reject(X),
+    	not(sub_string(SrcIP,_,_,_,"*")),
         atom_length(X,XLength),	%XLength stores length of X
-    	sub_string(X,0,2,_,'ip'),
+    	sub_string(X,_,_,_,'ip'),
     	(   
         (
     		%src ip syntax:- ip src addr or src addr dst addr
@@ -1134,9 +970,9 @@ isAdapterRejected(AdapterName) :-
                 (   
                  %src and dst addr(' ' signifies space before dst)
                   (
-                    sub_string(X,Start2,1,_,' '),
-                    Start2 >= Start1,
-                    Length is Start2-Start1,
+                    sub_string(X,Start2,_,_,"dst"),
+                    Start2 > Start1,
+                    Length is Start2-Start1-1,
                     sub_string(X,Start1,Length,_,SrcIPList),
                       (   
                       	(
@@ -1210,6 +1046,7 @@ isAdapterRejected(AdapterName) :-
 	isDstIPRejected(DstIP) :- 
     	reject(X),
     	atom_length(X,XLength),
+    	not(sub_string(DstIP,_,_,_,"*")),
     	sub_string(X,0,2,_,'ip'),
      (   
         (
@@ -1221,9 +1058,9 @@ isAdapterRejected(AdapterName) :-
                   (
                   	sub_string(X,SrcIndex,3,_,'src'),
             		Start1 is SrcIndex+9,
-                    sub_string(X,Start2,1,_,' '),
+                    sub_string(X,Start2,_,_,"dst"),
                     Start2 >= Start1,
-                     DstStart is Start2 + 10,
+                     DstStart is Start2 + 9,
                     (
                       (   
                       	sub_string(X,ProtoIndex,_,_,'proto'),
@@ -1300,6 +1137,7 @@ isAdapterRejected(AdapterName) :-
 	isTCPSrcRejected(TCPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
     	(
@@ -1338,6 +1176,7 @@ isAdapterRejected(AdapterName) :-
     	atom_length(X,XLength),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     (   
      (   
     	%Start of the list of port no is same and length depends upon whether src is present or not
@@ -1382,6 +1221,7 @@ isAdapterRejected(AdapterName) :-
 isUDPSrcRejected(UDPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
     (   
@@ -1417,6 +1257,7 @@ isUDPSrcRejected(UDPPortNo) :-
 	isUDPDstRejected(UDPPortNo) :- 
     	reject(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
     (   
@@ -1463,6 +1304,7 @@ isIPV6SrcRejected(IPV6SrcAddr) :-
     reject(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+    not(sub_string(IPV6SrcAddr,_,_,_,"*")),
    (   
     (   
     (
@@ -1537,17 +1379,17 @@ isIPV6DstRejected(IPV6DstAddr) :-
     reject(X),
     sub_string(X,_,4,_,'ipv6'),
     atom_length(X,XLength),
+    not(sub_string(IPV6DstAddr,_,_,_,"*")),
     (   
     (   
     (
     /*------------ipv6 dst addr or ipv6 src addr dst addr--------------*/
     (
-      sub_string(X,_,3,_,'src'),
       sub_string(X,DstStart,3,_,'dst'),
       Start is DstStart + 9,
       (
       	/*-----------ipv6 src addr dst addr or---------------*/
-        	/*-------------ipv6 src addr only, length remains same----------------*/
+        	/*-------------ipv6 dst addr only, length remains same----------------*/
             (
             	not(sub_string(X,_,_,_,'proto')),
             	Length is XLength - Start
@@ -1555,7 +1397,7 @@ isIPV6DstRejected(IPV6DstAddr) :-
       		;
       		(   
             	sub_string(X,ProtoIndex,_,_,'proto'),
-                Length is ProtoIndex-DstStart+1
+                Length is ProtoIndex-DstStart-1
             )
       ),
       sub_string(X,Start,Length,_,IPDstList),
@@ -1605,6 +1447,7 @@ isICMPTypeRejected(Type) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
+    not(sub_string(Type,_,_,_,"*")),
     (   
     (   
     Start is StartTemp + 5,
@@ -1632,6 +1475,7 @@ isICMPCodeRejected(Code) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
+    not(sub_string(Code,_,_,_,"*")),
     (   
     (   
     Start is StartTemp + 5,
@@ -1650,6 +1494,7 @@ isICMPV6TypeRejected(Type) :-
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
+    not(sub_string(Type,_,_,_,"*")),
     (   
     (   
     Start is StartTemp + 5,
@@ -1676,6 +1521,7 @@ isICMPV6CodeRejected(Code) :-
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
+    not(sub_string(Code,_,_,_,"*")),
     (   
     (   
     Start is StartTemp + 5,
@@ -1713,6 +1559,7 @@ isICMPV6CodeRejected(Code) :-
 isAdapterDropped(AdapterName) :- 
     drop(X),	%Check for clauses in drop predicate
     sub_string(X,_,_,_,'adapter'),	%Check if adapter is present in clause	
+    not(sub_string(AdapterName,_,_,_,"*")),
     (
     	%There's a direct match
 	    (
@@ -1743,23 +1590,23 @@ isAdapterDropped(AdapterName) :-
 	    drop(X),
     	sub_string(X,_,_,_,'ether'),
     	sub_string(X,_,_,_,'proto'),
+    	not(sub_string(ProtocolId,_,_,_,"*")),
 	 (   
         (
 	      (
 	        sub_string(X,_,_,_,'ether proto'),	
 	        % no vlan id present in clause (ether proto and no vid)
 	        sub_string(X,_,_,_,PresentProtocolID),
-	        PresentProtocolID = ProtocolId
+	        sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    	;
 	      % vlan id present in clause (ether vid _ proto )
 	      (   
-	          sub_string(X,Index,_,_,'proto'),
-	          %Index>=7 signifies that vid is present too
-	          Index >= 7,
+	          sub_string(X,_,_,_,'proto'),
+		 sub_string(X,_,_,_,'vid'),
 	          %Direct match now
 	          sub_string(X,_,_,_,PresentProtocolID),
-	          PresentProtocolID = ProtocolId
+	          sub_string(PresentProtocolID,_,_,_,ProtocolId)
 	      )
 	    )
     	;
@@ -1772,7 +1619,8 @@ isAdapterDropped(AdapterName) :-
 /*------------Rule to see if VlanID is dropable------------*/
 	isVlanIDDropped(VlanId) :- 
 	    drop(X),   
-         sub_string(X,0,9,_,'ether vid'),
+         sub_string(X,_,_,_,'ether vid'),
+         not(sub_string(VlanId,_,_,_,"*")),
       (   
 	    (   
 	    		%direct match
@@ -1813,6 +1661,7 @@ isAdapterDropped(AdapterName) :-
     	drop(X),
         atom_length(X,XLength),	%XLength stores length of X
     	sub_string(X,0,2,_,'ip'),
+    	not(sub_string(SrcIP,_,_,_,"*")),
     	(   
         (
     		%src ip syntax:- ip src addr or src addr dst addr
@@ -1822,9 +1671,9 @@ isAdapterDropped(AdapterName) :-
                 (   
                  %src and dst addr(' ' signifies space before dst)
                   (
-                    sub_string(X,Start2,1,_,' '),
+                    sub_string(X,Start2,_,_,"dst"),
                     Start2 >= Start1,
-                    Length is Start2-Start1,
+                    Length is Start2-Start1-1,
                     sub_string(X,Start1,Length,_,SrcIPList),
                       (   
                       	(
@@ -1897,8 +1746,9 @@ isAdapterDropped(AdapterName) :-
     %------DST IP
 	isDstIPDropped(DstIP) :- 
     	drop(X),
+    	not(sub_string(DstIP,_,_,_,"*")),
     	atom_length(X,XLength),
-    	sub_string(X,0,2,_,'ip'),
+    	sub_string(DstIP,0,2,_,'ip'),
      (   
         (
     %dst ip syntax:- ip dst addr or src addr dst addr 
@@ -1987,6 +1837,7 @@ isAdapterDropped(AdapterName) :-
 	isTCPSrcDropped(TCPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'src'),
     	(
@@ -2023,6 +1874,7 @@ isAdapterDropped(AdapterName) :-
 	isTCPDstDropped(TCPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
+    	not(sub_string(TCPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'tcp'),
     	sub_string(X,Start,3,_,'dst'),
     (   
@@ -2069,6 +1921,7 @@ isAdapterDropped(AdapterName) :-
 isUDPSrcDropped(UDPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'src'),
     (   
@@ -2104,6 +1957,7 @@ isUDPSrcDropped(UDPPortNo) :-
 	isUDPDstDropped(UDPPortNo) :- 
     	drop(X),
     	atom_length(X,XLength),
+    	not(sub_string(UDPPortNo,_,_,_,"*")),
     	sub_string(X,_,3,_,'udp'),
     	sub_string(X,Start,3,_,'dst'),
     (   
@@ -2149,6 +2003,7 @@ isUDPSrcDropped(UDPPortNo) :-
 isIPV6SrcDropped(IPV6SrcAddr) :- 
     drop(X),
     sub_string(X,_,4,_,'ipv6'),
+    not(sub_string(IPV6SrcAddr,_,_,_,"*")),
     atom_length(X,XLength),
    (   
     (   
@@ -2223,6 +2078,7 @@ isIPV6SrcDropped(IPV6SrcAddr) :-
 isIPV6DstDropped(IPV6DstAddr) :- 
     drop(X),
     sub_string(X,_,4,_,'ipv6'),
+    not(sub_string(IPV6DstAddr,_,_,_,"*")),
     atom_length(X,XLength),
     (   
     (   
@@ -2292,6 +2148,7 @@ isICMPTypeDropped(Type) :-
     sub_string(X,_,_,_,'icmp'),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'type'),
+    not(sub_string(Type,_,_,_,"*")),
     (   
     (   
     Start is StartTemp + 5,
@@ -2317,6 +2174,7 @@ isICMPCodeDropped(Code) :-
     drop(X),
     atom_length(X,XLength),
     sub_string(X,_,_,_,'icmp'),
+    not(sub_string(Code,_,_,_,"*")),
     not(sub_string(X,_,_,_,'icmpv6')),
     sub_string(X,StartTemp,_,_,'code'),
     (   
@@ -2335,6 +2193,7 @@ isICMPCodeDropped(Code) :-
 isICMPV6TypeDropped(Type) :- 
     drop(X),
     atom_length(X,XLength),
+    not(sub_string(Type,_,_,_,"*")),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'type'),
     (   
@@ -2361,6 +2220,7 @@ isICMPV6TypeDropped(Type) :-
 isICMPV6CodeDropped(Code) :- 
     drop(X),
     atom_length(X,XLength),
+    not(sub_string(Code,_,_,_,"*")),
     sub_string(X,_,_,_,'icmpv6'),
     sub_string(X,StartTemp,_,_,'code'),
     (   
@@ -2375,11 +2235,3 @@ isICMPV6CodeDropped(Code) :-
         	sub_string(X,_,_,_,'any')
         )
      ).
-
-
-
-
-
-
-
-

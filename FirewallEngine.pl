@@ -11,7 +11,7 @@ printStatus(X) :-
     (
     	not(printReject(X)),
         not(printDropped(X)),
-        printAccept(X),
+        printAccepted(X),
         write('Packet Accepted')
     ).
 
@@ -49,7 +49,7 @@ printReject(X) :-
     	isTCPSrcRejected(TCPPortNo)
     );
     (   
-    	dstSrc(X,TCPPortNo),
+    	tcpSrc(X,TCPPortNo),
     	isTCPDstRejected(TCPPortNo)
     );
     ( 
@@ -75,6 +75,10 @@ printReject(X) :-
     (   
     	icmpCode(X,Code),
     	isICMPCodeRejected(Code)
+    );
+    (   
+	protocolID(X,ID),
+    	isProtocolIDRejected(ID)
     ).
 printDropped(X) :-
     (   
@@ -110,7 +114,7 @@ printDropped(X) :-
     	isTCPSrcDropped(TCPPortNo)
     );
     (   
-    	dstSrc(X,TCPPortNo),
+    	tcpSrc(X,TCPPortNo),
     	isTCPDstRejected(TCPPortNo)
     );
     ( 
@@ -136,66 +140,10 @@ printDropped(X) :-
     (   
     	icmpCode(X,Code),
     	isICMPCodeDropped(Code)
+    );
+    (   
+	protocolID(X,ID),
+    	isProtocolIDDropped(ID)
     ).
 
-printAccepted(X) :-
-    (   
-    	src_ip(X,Src_IP),
-    	isSrcIPAccepted(Src_IP)
-    );
-    (   
-    	dest_ip(X, Dest_IP),
-        isDstIPAccepted(Dest_IP)
-    );
-    (   
-    	adapter_num(X,Adap),
-        isAdapterAccepted(Adap)
-    );
-    (   
-    	protocol_type(X,Protocol),
-        isProtocolIDAccepted(Protocol)
-    );
-    (   
-    	icmpv6_type(X, IC6),
-        isICMPV6TypeAccepted(IC6)	
-    );
-    (   
-    	icmpv6_msgCode(X,Msg),
-        isICMPV6CodeAccepted(Msg)	
-    );
-    ( 
-    	vlanId(X,VLAN),					
-        isVlanIDAccepted(VLAN)			
-    );
-    (
-    	tcpSrc(X,TCPPortNo),
-    	isTCPSrcAccepted(TCPPortNo)
-    );
-    (   
-    	dstSrc(X,TCPPortNo),
-    	isTCPDstAccepted(TCPPortNo)
-    );
-    ( 
-    	udpSrc(X,UDPPortNo),
-   		isUDPSrcAccepted(UDPPortNo) 
-    );
-    (   
-    	udpDst(X,UDPPortNo),
-   		isUDPDstAccepted(UDPPortNo) 
-    );
-    (  
-    	ipv6Src(X,IPV6SrcAddr),
-   		isIPV6SrcAccepted(IPV6SrcAddr) 
-    );
-    (   
-    	ipv6Dst(X,IPV6DstAddr),
-    	isIPV6DstAccepted(IPV6DstAddr)
-    );
-    (   
-    	icmpType(X,Type),
-    	isICMPTypeAccepted(Type)
-    );
-    (   
-    	icmpCode(X,Code),
-    	isICMPCodeAccepted(Code)
-    ).
+printAccepted(_) :- true. /********** Because the default behaviour is 'accept'.*/
