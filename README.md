@@ -1,4 +1,3 @@
-
 ## User Interface
 - The top level procedure is printStatus(<’packetname’>)
 
@@ -52,3 +51,9 @@ attribute_list is a list containing 16 attributes of the packet, all enclosed in
 The parameters for ipv4 and ipv6 are mutually exclusive; so are the parameters for tcp and udp. For the values not to be given, an asterisk '*' should be used.
 
 Examples can be found in FactsDatabase.pl
+
+## Group Members
+
+- Harpinder Jot Singh [Github](https://github.com/HarpinderJotSingh) [LinkedIn](https://www.linkedin.com/in/harpinder-jot-singh-248b92155/?originalSubdomain=in)
+- Vishal Mittal [Github](https://github.com/vismit2000) [LinkedIn](https://www.linkedin.com/in/vishal-mittal-113494157/)
+- Yash Vijay
