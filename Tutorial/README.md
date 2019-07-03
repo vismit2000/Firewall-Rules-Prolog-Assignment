@@ -62,4 +62,10 @@ In an IP address,The slash and the number following it is just a shorthand way t
 
 Another example could be 10.0.0.0/8. 8 consecutive 1's in the subnet mask gives you 11111111.00000000.00000000.00000000 or 255.0.0.0.
 
+### Official Documentation by IBM here
 
+- [Firewall rule language](https://www.ibm.com/support/knowledgecenter/en/SSB2MG_4.6.0/com.ibm.ips.doc/concepts/firewall_rules_language.htm)
+
+- [Firewall rule syntax](https://www.ibm.com/support/knowledgecenter/SSB2MG_4.6.0/com.ibm.ips.doc/references/firewall_rule_syntax.htm)
+
+- [Firewall rule examples](https://www.ibm.com/support/knowledgecenter/SSB2MG_4.6.0/com.ibm.ips.doc/references/firewall_rule_examples.htm)
