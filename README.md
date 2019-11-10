@@ -57,7 +57,7 @@ The parameters for ipv4 and ipv6 are mutually exclusive; so are the parameters f
 
 Examples can be found in FactsDatabase.pl
 
-## IMPORTANT INFORMATION RELATED TO THE FUNCTIONALITY OF THE PROGRAM
+## Important Information Related to the Functionality of the Program
 
 - Clauses having multiple optional parameters should be dealt with carefully. Their permutation follow a STRICT fashion.
 For Example -
