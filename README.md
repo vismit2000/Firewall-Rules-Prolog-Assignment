@@ -1,6 +1,8 @@
 ## Firewall Rules
 Assignment for Logic in Computer Science (CS F214) course at BITS Pilani. Implementing rules for a Firewall (over a network) in Prolog language.
 
+To run this project, you will need SWI Prolog which can be downloaded [here](http://www.swi-prolog.org/download/stable).
+
 ## User Interface
 - The top level procedure is printStatus(<’packetname’>)
 
