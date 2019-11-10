@@ -57,6 +57,38 @@ The parameters for ipv4 and ipv6 are mutually exclusive; so are the parameters f
 
 Examples can be found in FactsDatabase.pl
 
+## IMPORTANT INFORMATION RELATED TO THE FUNCTIONALITY OF THE PROGRAM
+
+- Clauses having multiple optional parameters should be dealt with carefully. Their permutation follow a STRICT fashion.
+For Example -
+The 2 separate rules - 'accept tcp src addr 192.168.17.10' and 'accept tcp dst addr 192.168.17.15'
+are NOT THE SAME as the single rule 'accept tcp dst addr 192.168.17.15 src addr 192.168.17.10'
+Both are treated differently, i.e. considering the rule 'accept tcp src addr 192.168.17.10 dst addr 192.168.17.15', the only packet that will match this will be the one where BOTH src and dst parameters match the rule, and not the ones where only one of the parameter matches.
+Similarly, packets which specify both src and dst parameter will look only for rules having both the parameter mentioned.
+
+- There might be situations where multiple rules apply to the given packet.
+These rules might collide with each other's result. In such situations, the following convention is followed -
+    (i) If the colliding rules are of the same Clause/Condition, then the rule APPEARING FIRST in the order of rules will be give higher priority, i.e. its output action will be considered.
+    (ii) If the colliding rules are of different Clauses/Conditions, then priority will be decided based on the output actions of the rules.
+    The priority order in this case is - Reject > Drop > Accept.
+
+- The 'any' keyword will be applied to any value of the parameter, except when the parameter is left empty (empty string ""), i.e. some value for the parameter is needed for the rule with 'any' to apply.
+
+- Default action is taken as 'accept'. This is for the situations when :-
+    (i) No rule matches the clause/condition in the packet.
+    (ii) Numerical/Alphabetic values in a clause/condition lies out of the ranges mentioned in 'CLAUSES.txt' file.
+    (iii) Wrong syntax is used in writing down the clause/condition.
+
+- Wherever you wish to use decimal / hexadecimal / octal values, use correct prefixes :-
+    (i) Octal - '0', e.g. 10 = 012
+    (ii) Hexadecimal - '0x', e.g. 35 = 0x23
+    (iii) Decimal - No prefix
+
+- Range-type parameters should follow the order of minimum value followed by maximum value. Wrong order will give ambiguous results.
+For example- `35-10` is wrong syntax, and will not give the correct results
+
+- NOT expressions should be used carefully. Only valid expressions should be used inside !(...). Using invalid expressions will lead to ambiguous results. For example !(asdf) is invalid for any clause/condition.
+
 ## Group Members
 
 - Harpinder Jot Singh [Github](https://github.com/HarpinderJotSingh) [LinkedIn](https://www.linkedin.com/in/harpinder-jot-singh-248b92155/?originalSubdomain=in)
