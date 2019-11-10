@@ -1,3 +1,6 @@
+##Firewall Rules
+Assignment for Logic in Computer Science (CS F214) course at BITS Pilani. Implementing rules for a Firewall (over a network) in Prolog language.
+
 ## User Interface
 - The top level procedure is printStatus(<’packetname’>)
 
